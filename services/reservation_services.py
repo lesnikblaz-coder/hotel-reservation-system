@@ -2,7 +2,8 @@ from datetime import date
 
 import repository
 
-from exceptions import RoomNotFoundError, ReservationNotFoundError, InvalidDateFormatError, ConflictingDateError
+from exceptions import RoomNotFoundError, ReservationNotFoundError, InvalidDateFormatError, ConflictingDateError, \
+    GuestNotFoundError
 
 from models import Reservation
 from services import guest_services
@@ -24,7 +25,8 @@ def validate_reservation_dates(check_in: date, check_out: date):
         raise ConflictingDateError("Check-in cannot be in the past.")
 
 def reservation_create(guest_id: int, room_id: int, check_in_date: date, check_out_date: date):
-    #guest_id will be an id of the selected guest at the time.
+    if not repository.get_guest_by_id(guest_id):
+        raise GuestNotFoundError("Invalid guest ID.")
 
     if not repository.get_room_by_id(room_id):
         raise RoomNotFoundError("Invalid room ID.")
