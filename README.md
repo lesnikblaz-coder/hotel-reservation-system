@@ -129,7 +129,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/hotel_db
 ## Running the Application
 
 ```bash
-uvicorn main:app --reload
+uvicorn api:app --reload
 ```
 
 API documentation:
@@ -155,6 +155,3 @@ pytest
 7. GitHub Actions (CI)
 8. Deploy to Render
 9. API rate limiting
-
-```
-```
