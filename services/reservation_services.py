@@ -82,7 +82,12 @@ def reservation_check_out(reservation_id):
     return reservation
 
 def reservations_get_all():
-    return repository.get_all_reservations()
+    reservations = repository.get_all_reservations()
+
+    if not reservations:
+        raise ReservationNotFoundError("No reservations found.")
+
+    return reservations
 
 def reservations_search_by_guest(guest_id):
     guest = guest_services.guest_select_by_id(guest_id)
