@@ -8,7 +8,7 @@ def validate_room_type(room_type: str):
     room_data = VALID_ROOM_TYPES.get(room_type)
 
     if room_data is None:
-        raise InvalidRoomTypeError("Invalid room type.")
+        raise InvalidRoomTypeError(f"Invalid room type. Valid types: {', '.join(VALID_ROOM_TYPES.keys())}")
 
     return room_data
 
