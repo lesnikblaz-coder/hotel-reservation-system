@@ -82,7 +82,7 @@ class Reservation(BaseModel):
 
     def cancel(self):
         if self.status not in CANCELLABLE_STATUSES:
-            raise ValueError("Cannot cancel a reservation that isn't booked.")
+            raise InvalidReservationStateError("Cannot cancel a reservation that isn't booked.")
 
         self.status = "cancelled"
 
