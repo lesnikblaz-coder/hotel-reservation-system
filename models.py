@@ -1,78 +1,69 @@
+from sqlalchemy import Integer, String, Float, Boolean, Date, ForeignKey, Sequence
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date
-from pydantic import BaseModel
 
+from database import Base
 from constants import CANCELLABLE_STATUSES, CHECKIN_STATUSES, CHECKOUT_STATUSES
 from exceptions import InvalidReservationStateError, InvalidCheckInDateError, CheckOutDatePassedError, NoChangesError
 
-class Guest(BaseModel):
-    guest_id: int | None = None
-    first_name: str
-    last_name: str
-    email: str
-    phone: str
+class Guest(Base):
+    __tablename__ = "guests"
 
-    def __str__(self):
-        return(
-            f'Guest ID: {self.guest_id}, '
-            f'first name: {self.first_name}, '
-            f'last name: {self.last_name}, '
-            f'email: {self.email}, '
-            f'phone: {self.phone}'
-        )
+    guest_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    first_name: Mapped[str] = mapped_column(String, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    phone: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
-    def full_name(self):
+    reservations: Mapped[list["Reservation"]] = relationship(back_populates="guest")
+
+    def __repr__(self):
+        return f'<Guest(guest_id={self.guest_id}, email={self.email})>'
+
+    def full_name(self) -> str:
         return f'{self.first_name} {self.last_name}'
 
-class Room(BaseModel):
-    room_id: int | None = None
-    room_number: int | None = None
-    room_type: str
-    capacity: int
-    price_per_night: float
-    is_active: bool
+class Room(Base):
+    __tablename__ = "rooms"
 
-    def __str__(self):
-        return (
-            f'Room ID: {self.room_id}, '
-            f'room number: {self.room_number}, '
-            f'room type: {self.room_type}, '
-            f'capacity: {self.capacity}, '
-            f'price per night: {self.price_per_night}, '
-            f'is active: {self.is_active}'
-        )
+    room_number_seq = Sequence("room_number_seq", start=1000)
 
-    def deactivate(self):
+    room_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    room_number: Mapped[int] = mapped_column(Integer, room_number_seq, server_default=room_number_seq.next_value(), nullable=False, unique=True)
+    room_type: Mapped[str] = mapped_column(String, nullable=False)
+    capacity: Mapped[int] = mapped_column(Integer, nullable=False)
+    price_per_night: Mapped[float] = mapped_column(Float, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    reservations: Mapped[list["Reservation"]] = relationship(back_populates="room")
+
+    def deactivate(self) -> None:
         if not self.is_active:
             raise NoChangesError("Room is already inactive.")
 
         self.is_active = False
 
-    def activate(self):
+    def activate(self) -> None:
         if self.is_active:
             raise NoChangesError("Room is already active.")
 
         self.is_active = True
 
-    def total_price(self, nights: int):
+    def total_price(self, nights: int) -> float:
         return self.price_per_night * nights
 
-class Reservation(BaseModel):
-    reservation_id: int | None = None
-    guest_id: int
-    room_id: int
-    check_in_date: date
-    check_out_date: date
-    status: str
+class Reservation(Base):
+    __tablename__ = "reservations"
 
-    def __str__(self):
-        return (
-            f'Reservation ID: {self.reservation_id}, '
-            f'Guest ID: {self.guest_id}, '
-            f'Room ID: {self.room_id}, '
-            f'check in date: {self.check_in_date}, '
-            f'check out date: {self.check_out_date}, '
-            f'status: {self.status}'
-        )
+    reservation_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    guest_id: Mapped[int] = mapped_column(Integer, ForeignKey("guests.guest_id"), nullable=False)
+    room_id: Mapped[int] = mapped_column(Integer, ForeignKey("rooms.room_id"), nullable=False)
+    check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
+    check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False)
+
+    guest: Mapped["Guest"] = relationship(back_populates="reservations")
+    room: Mapped["Room"] = relationship(back_populates="reservations")
 
     def duration_nights(self):
         ci = self.check_in_date
