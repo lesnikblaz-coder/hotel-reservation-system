@@ -1,109 +1,131 @@
-from database import guest_db, rooms_db, reservations_db
-import models
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from datetime import date
+
+from models import Guest, Room, Reservation
+from schemas import GuestUpdate, RoomUpdate
 
 #GUESTS
-def _row_to_guest(row) -> models.Guest:
-    return models.Guest(
-        guest_id=row["guest_id"],
-        first_name=row["first_name"],
-        last_name=row["last_name"],
-        email=row["email"],
-        phone=row["phone"]
-    )
+def get_all_guests(db: Session) -> list[Guest]:
+    return list(db.scalars(select(Guest)).all())
 
-def get_all_guests() -> list[models.Guest]:
-    rows = guest_db.db_get_guest_all()
-    return [_row_to_guest(row) for row in rows]
+def get_guest_by_id(db: Session, guest_id: int) -> Guest | None:
+    return db.scalars(select(Guest).where(Guest.guest_id == guest_id)).first()
 
-def get_guest_by_id(guest_id) -> models.Guest | None:
-    row = guest_db.db_get_guest_by_id(guest_id)
-    return _row_to_guest(row) if row else None
+def get_guest_by_email(db: Session, email: str) -> Guest | None:
+    return db.scalars(select(Guest).where(Guest.email == email)).first()
 
-def get_guest_by_email(email) -> models.Guest | None:
-    row = guest_db.db_get_guest_by_email(email)
-    return _row_to_guest(row) if row else None
+def get_guest_by_phone(db: Session, phone: str) -> Guest | None:
+    return db.scalars(select(Guest).where(Guest.phone == phone)).first()
 
-def get_guest_by_phone(phone) -> models.Guest | None:
-    row = guest_db.db_get_guest_by_phone(phone)
-    return _row_to_guest(row) if row else None
+def guest_create(db: Session, guest: Guest) -> Guest:
+    db.add(guest)
+    db.commit()
+    db.refresh(guest)
 
-def guest_create(guest):
-    return guest_db.db_guest_insert(guest)
+    return guest
 
-def guest_delete(guest_id):
-    return guest_db.db_guest_delete(guest_id)
+def guest_delete(db: Session, guest: Guest) -> Guest:
+    db.delete(guest)
+    db.commit()
 
-def guest_update(guest_id, data):
-    return guest_db.db_guest_update(guest_id, data)
+    return guest
+
+def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
+    if data.first_name is not None:
+        guest.first_name = data.first_name
+
+    if data.last_name is not None:
+        guest.last_name = data.last_name
+
+    if data.email is not None:
+        guest.email = data.email
+
+    if data.phone is not None:
+        guest.phone = data.phone
+
+    db.commit()
+    db.refresh(guest)
+
+    return guest
 
 #ROOMS
-def _row_to_room(row) -> models.Room:
-    return models.Room(
-        room_id=row["room_id"],
-        room_number=row["room_number"],
-        room_type=row["room_type"],
-        capacity=row["capacity"],
-        price_per_night=row["price_per_night"],
-        is_active=row["is_active"]
-    )
+def get_all_rooms(db: Session) -> list[Room]:
+    return list(db.scalars(select(Room)).all())
 
-def get_all_rooms() -> list[models.Room]:
-    rows = rooms_db.db_get_rooms_all()
-    return [_row_to_room(row) for row in rows]
+def get_room_by_id(db: Session, room_id: int) -> Room | None:
+    return db.scalars(select(Room).where(Room.room_id == room_id)).first()
 
-def get_room_by_id(room_id) -> models.Room | None:
-    row = rooms_db.db_get_room_by_id(room_id)
-    return _row_to_room(row) if row else None
+def room_create(db: Session, room: Room) -> Room:
+    db.add(room)
+    db.commit()
+    db.refresh(room)
 
-def room_create(room):
-    return rooms_db.db_room_insert(room)
+    return room
 
-def room_delete(room_id):
-    return rooms_db.db_room_delete(room_id)
+def room_delete(db: Session, room: Room) -> Room:
+    db.delete(room)
+    db.commit()
 
-def room_update(room_id, data):
-    return rooms_db.db_room_update(room_id, data)
+    return room
 
-def get_available_rooms():
-    rows = rooms_db.db_get_available_rooms()
-    return [_row_to_room(row) for row in rows]
+def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
+    if data.room_type is not None:
+        room.room_type = data.room_type
 
-def get_first_room_per_type():
-    rows = rooms_db.db_get_first_room_per_type()
-    return [_row_to_room(row) for row in rows]
+    if data.capacity is not None:
+        room.capacity = data.capacity
+
+    if data.price_per_night is not None:
+        room.price_per_night = data.price_per_night
+
+    if data.is_active is not None:
+        room.is_active = data.is_active
+
+    db.commit()
+    db.refresh(room)
+
+    return room
+
+def get_available_rooms(db: Session) -> list[Room]:
+    return list(db.scalars(select(Room).where(Room.is_active)).all())
+
+def room_save(db: Session, room: Room) -> Room:
+    db.commit()
+    db.refresh(room)
+
+    return room
 
 #RESERVATIONS
-def _row_to_reservation(row) -> models.Reservation:
-    return models.Reservation(
-        reservation_id=row["reservation_id"],
-        guest_id=row["guest_id"],
-        room_id=row["room_id"],
-        check_in_date=row["check_in_date"],
-        check_out_date=row["check_out_date"],
-        status=row["status"]
-    )
+def get_all_reservations(db: Session) -> list[Reservation]:
+    return list(db.scalars(select(Reservation)).all())
 
-def get_all_reservations() -> list[models.Reservation]:
-    rows = reservations_db.db_get_reservations_all()
-    return [_row_to_reservation(row) for row in rows]
+def get_reservation_by_guest(db: Session, guest_id: int) -> list[Reservation]:
+    return list(db.scalars(select(Reservation).where(Reservation.guest_id == guest_id)).all())
 
-def get_reservation_by_guest(guest_id) -> list[models.Reservation]:
-    rows = reservations_db.db_get_reservations_by_guest(guest_id)
-    return [_row_to_reservation(row) for row in rows]
+def reservation_create(db: Session, reservation: Reservation) -> Reservation:
+    db.add(reservation)
+    db.commit()
+    db.refresh(reservation)
 
-def reservation_create(reservation):
-    return reservations_db.db_reservation_insert(reservation)
+    return reservation
 
-def get_conflicting_reservations(room_id, check_in_date, check_out_date):
-    return reservations_db.db_get_conflicting_reservation(room_id, check_in_date, check_out_date)
+def get_conflicting_reservations(db:Session, room_id: int, new_check_in: date, new_check_out: date) -> Reservation | None:
+    return db.scalars(select(Reservation).where(
+        Reservation.room_id == room_id,
+        Reservation.status.notin_(["checked_out", "cancelled"]),
+        Reservation.check_in_date < new_check_out,
+        Reservation.check_out_date > new_check_in
+    )).first()
 
-def get_reservation_by_id(reservation_id):
-    row = reservations_db.db_get_reservation_by_id(reservation_id)
-    return _row_to_reservation(row) if row else None
+def get_reservation_by_id(db: Session, reservation_id: int) -> Reservation | None:
+    return db.scalars(select(Reservation).where(Reservation.reservation_id == reservation_id)).first()
 
-def get_reservations_for_room(room_id):
-    rows = reservations_db.db_get_reservations_for_room(room_id)
-    return [_row_to_reservation(row) for row in rows]
+def get_reservations_for_room(db: Session, room_id: int) -> list[Reservation]:
+    return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id)).all())
 
-def reservation_update(reservation_id, field, new_value):
-    return reservations_db.db_reservation_update(reservation_id, field, new_value)
+def reservation_save(db: Session, reservation: Reservation) -> Reservation:
+    db.commit()
+    db.refresh(reservation)
+
+    return reservation
