@@ -1,10 +1,13 @@
+from sqlalchemy.orm import Session
+
 import repository
 
 from models import Room
-from constants import VALID_ROOM_TYPES
-from exceptions import InvalidRoomTypeError, RoomNotFoundError, ActiveReservationError, NoChangesError
+from schemas import RoomUpdate
+from constants import VALID_ROOM_TYPES, NON_DELETABLE_STATUSES
+from exceptions import InvalidRoomTypeError, RoomNotFoundError, ActiveReservationError
 
-def validate_room_type(room_type: str):
+def validate_room_type(room_type: str) -> dict[str, int | float]:
     room_data = VALID_ROOM_TYPES.get(room_type)
 
     if room_data is None:
@@ -12,7 +15,8 @@ def validate_room_type(room_type: str):
 
     return room_data
 
-def room_create(room_type: str):
+def room_create(db: Session, room_type: str) -> Room:
+    # validate room type existence
     room_data = validate_room_type(room_type)
 
     capacity = room_data["capacity"]
@@ -20,79 +24,53 @@ def room_create(room_type: str):
 
     room = Room(room_type=room_type, capacity=capacity, price_per_night=price_per_night, is_active=True)
 
-    new_room_keys = repository.room_create(room)
-    room.room_id = new_room_keys["room_id"]
-    room.room_number = new_room_keys["room_number"]
-    print(f'DEBUG: room.room_id={room.room_id}')
-    print(f'DEBUG: room.room_number={room.room_number}')
+    return repository.room_create(db, room)
 
-    return room
-
-def room_select_by_id(room_id):
-    room = repository.get_room_by_id(room_id)
+def room_select_by_id(db: Session, room_id: int) -> Room:
+    room = repository.get_room_by_id(db, room_id)
 
     if room is None:
         raise RoomNotFoundError("Room not found.")
 
     return room
 
-def room_delete(room_id):
-    if repository.get_reservations_for_room(room_id):
+def room_delete(db: Session, room_id: int) -> None:
+    reservations = repository.get_reservations_for_room(db, room_id)
+
+    # only reservations with status "checked_out" or "cancelled" can be deleted.
+    active_reservations = [r for r in reservations
+                           if r.status in NON_DELETABLE_STATUSES]
+
+    if active_reservations:
         raise ActiveReservationError("Room has active reservations. Unable to delete.")
 
-    repository.room_delete(room_id)
+    room = room_select_by_id(db, room_id)
 
-def room_deactivate(room):
+    repository.room_delete(db, room)
+
+def room_deactivate(db: Session, room: Room) -> Room:
     room.deactivate()
-    repository.room_update(room.room_id, room)
+    return repository.room_save(db, room)
 
-def room_activate(room):
+def room_activate(db: Session, room: Room) -> Room:
     room.activate()
-    repository.room_update(room.room_id, room)
+    return repository.room_save(db, room)
 
-def rooms_get_all():
-    rooms = repository.get_all_rooms()
+def rooms_get_all(db: Session) -> list[Room]:
+    return repository.get_all_rooms(db)
 
-    if not rooms:
-        raise RoomNotFoundError("No rooms found.")
-
-    return rooms
-
-def rooms_get_available():
-    available_rooms = repository.get_available_rooms()
+def rooms_get_available(db: Session) -> list[Room]:
+    available_rooms = repository.get_available_rooms(db)
 
     if not available_rooms:
         raise RoomNotFoundError("No available rooms.")
 
     return available_rooms
 
-def room_update(room_id, data):
-    room = room_select_by_id(room_id)
+def room_update(db: Session, room_id: int, data: RoomUpdate) -> Room:
+    room = room_select_by_id(db, room_id)
 
     if data.room_type:
         validate_room_type(data.room_type)
 
-    if (data.room_type == room.room_type and
-        data.capacity == room.capacity and
-        data.price_per_night == room.price_per_night and
-        data.is_active == room.is_active
-    ):
-        raise NoChangesError("New value same as old value.")
-
-    repository.room_update(room_id, data)
-
-    return repository.get_room_by_id(room_id)
-
-def validate_field(room, field: str):
-    try:
-        return getattr(room, field)
-    except AttributeError:
-        raise ValueError("Invalid field.")
-
-def get_first_room_each_type():
-    rooms = repository.get_first_room_per_type()
-
-    if not rooms:
-        raise RoomNotFoundError("No rooms found.")
-
-    return rooms
+    return repository.room_update(db, room, data)
