@@ -1,10 +1,10 @@
 # Hotel Reservation System
 
-A hotel reservation management API built with FastAPI and PostgreSQL.
+A hotel reservation management API built with FastAPI, PostgreSQL, and SQLAlchemy ORM, following a layered architecture with separate API, service, and data access layers.
 
 This project started as a command-line application using SQLite and was later refactored into a REST API using FastAPI and PostgreSQL as part of my backend development learning journey.
 
-## Features
+### Features
 
 ### Guest Management
 
@@ -72,6 +72,7 @@ This project started as a command-line application using SQLite and was later re
 * Python
 * FastAPI
 * PostgreSQL
+* SQLAlchemy ORM
 * Pydantic
 * Pytest
 
@@ -84,6 +85,39 @@ This project went through several iterations:
 3. Refactored into a layered architecture.
 4. Migrated database storage from SQLite to PostgreSQL.
 5. Converted the application into a FastAPI REST API.
+6. Introduced SQLAlchemy ORM for database modeling and data access.
+
+## Architecture
+
+The application is organized into separate layers to improve maintainability and separation of concerns:
+
+### API Layer
+
+* `api.py` defines the FastAPI routes and handles HTTP requests and responses.
+
+### Service Layer
+
+* `services/` contains the business logic for guest, room, and reservation operations.
+* Business rules such as room availability checks and reservation validation are handled here.
+
+### Data Access Layer
+
+* `repository.py` is responsible for database operations and acts as the interface between the application and the database.
+
+### Database Layer
+
+* `database.py` manages database connections and SQLAlchemy session configuration.
+* `models.py` defines the SQLAlchemy ORM models that map Python classes to PostgreSQL tables.
+
+### Validation Layer
+
+* `schemas.py` contains Pydantic models used for request validation and API response serialization.
+
+### Error Handling
+
+* `exceptions.py` defines custom application exceptions.
+* `exception_handlers.py` converts application exceptions into appropriate HTTP responses.
+
 
 ## Installation
 
@@ -144,14 +178,24 @@ http://127.0.0.1:8000/docs
 pytest
 ```
 
+## Key Learning Outcomes
+
+- REST API design with FastAPI
+- Database schema design
+- SQLAlchemy ORM relationships and querying
+- Business rule enforcement (preventing overlapping reservations)
+- Layered application architecture
+- Input validation with Pydantic
+- Automated testing with Pytest
+
 ## Future Improvements
 
-1. Expand FastAPI test coverage
-2. Refactor database layer to SQLAlchemy ORM
-3. JWT Authentication
-4. Authorization
-5. Role-based access control
-6. Docker + Docker Compose
-7. GitHub Actions (CI)
-8. Deploy to Render
-9. API rate limiting
+- Expand FastAPI test coverage
+- Add Alembic database migrations
+- JWT Authentication
+- Authorization
+- Role-based access control
+- Docker + Docker Compose
+- GitHub Actions (CI)
+- Deploy to Render
+- API rate limiting
