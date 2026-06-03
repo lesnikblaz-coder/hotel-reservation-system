@@ -74,6 +74,14 @@ def room_update(room_id: int, request: schemas.RoomUpdate, db: Session = Depends
 def room_delete(room_id: int, db: Session = Depends(get_db)) -> None:
     room_services.room_delete(db, room_id)
 
+@app.post("/rooms/{room_id}/activate", response_model=schemas.RoomResponse)
+def room_activate(room_id: int, db: Session = Depends(get_db)) -> models.Room:
+    return room_services.room_activate(db, room_id)
+
+@app.post("/rooms/{room_id}/deactivate", response_model=schemas.RoomResponse)
+def room_deactivate(room_id: int, db: Session = Depends(get_db)) -> models.Room:
+    return room_services.room_deactivate(db, room_id)
+
 
 # --- reservations ---
 @app.post("/reservations", status_code=201, response_model=schemas.ReservationResponse)
@@ -94,14 +102,14 @@ def reservations_get(db: Session = Depends(get_db)) -> list[models.Reservation]:
 def reservation_get(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_select_by_id(db, reservation_id)
 
-@app.put("/reservations/{reservation_id}/cancel", response_model=schemas.ReservationResponse)
+@app.post("/reservations/{reservation_id}/cancel", response_model=schemas.ReservationResponse)
 def reservation_cancel(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_cancel(db, reservation_id)
 
-@app.put("/reservations/{reservation_id}/check-in", response_model=schemas.ReservationResponse)
+@app.post("/reservations/{reservation_id}/check-in", response_model=schemas.ReservationResponse)
 def reservation_check_in(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_check_in(db, reservation_id)
 
-@app.put("/reservations/{reservation_id}/check-out", response_model=schemas.ReservationResponse)
+@app.post("/reservations/{reservation_id}/check-out", response_model=schemas.ReservationResponse)
 def reservation_check_out(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_check_out(db, reservation_id)
