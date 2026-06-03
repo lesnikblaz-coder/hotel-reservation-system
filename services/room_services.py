@@ -48,13 +48,15 @@ def room_delete(db: Session, room_id: int) -> None:
 
     repository.room_delete(db, room)
 
-def room_deactivate(db: Session, room: Room) -> Room:
+def room_deactivate(db: Session, room_id: int) -> Room:
+    room = room_select_by_id(db, room_id)
     room.deactivate()
-    return repository.room_save(db, room)
+    return repository.save(db, room)
 
-def room_activate(db: Session, room: Room) -> Room:
+def room_activate(db: Session, room_id: int) -> Room:
+    room = room_select_by_id(db, room_id)
     room.activate()
-    return repository.room_save(db, room)
+    return repository.save(db, room)
 
 def rooms_get_all(db: Session) -> list[Room]:
     return repository.get_all_rooms(db)

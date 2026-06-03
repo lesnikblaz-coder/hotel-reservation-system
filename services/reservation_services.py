@@ -61,19 +61,19 @@ def reservation_cancel(db: Session, reservation_id: int) -> Reservation:
     reservation = reservation_select_by_id(db, reservation_id)
     reservation.cancel()
 
-    return repository.reservation_save(db, reservation)
+    return repository.save(db, reservation)
 
 def reservation_check_in(db: Session, reservation_id: int) -> Reservation:
     reservation = reservation_select_by_id(db, reservation_id)
     reservation.check_in()
 
-    return repository.reservation_save(db, reservation)
+    return repository.save(db, reservation)
 
 def reservation_check_out(db: Session, reservation_id: int) -> Reservation:
     reservation = reservation_select_by_id(db, reservation_id)
     reservation.check_out()
 
-    return repository.reservation_save(db, reservation)
+    return repository.save(db, reservation)
 
 def reservations_get_all(db: Session) -> list[Reservation]:
     return repository.get_all_reservations(db)

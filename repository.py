@@ -5,6 +5,13 @@ from datetime import date
 from models import Guest, Room, Reservation
 from schemas import GuestUpdate, RoomUpdate
 
+# centralized database saving
+def save(db: Session, obj):
+    db.commit()
+    db.refresh(obj)
+
+    return obj
+
 #GUESTS
 def get_all_guests(db: Session) -> list[Guest]:
     return list(db.scalars(select(Guest).order_by(Guest.guest_id)).all())
@@ -20,16 +27,11 @@ def get_guest_by_phone(db: Session, phone: str) -> Guest | None:
 
 def guest_create(db: Session, guest: Guest) -> Guest:
     db.add(guest)
-    db.commit()
-    db.refresh(guest)
-
-    return guest
+    return save(db, guest)
 
 def guest_delete(db: Session, guest: Guest) -> Guest:
     db.delete(guest)
-    db.commit()
-
-    return guest
+    return save(db, guest)
 
 def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
     if data.first_name is not None:
@@ -44,10 +46,7 @@ def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
     if data.phone is not None:
         guest.phone = data.phone
 
-    db.commit()
-    db.refresh(guest)
-
-    return guest
+    return save(db, guest)
 
 #ROOMS
 def get_all_rooms(db: Session) -> list[Room]:
@@ -58,16 +57,11 @@ def get_room_by_id(db: Session, room_id: int) -> Room | None:
 
 def room_create(db: Session, room: Room) -> Room:
     db.add(room)
-    db.commit()
-    db.refresh(room)
-
-    return room
+    return save(db, room)
 
 def room_delete(db: Session, room: Room) -> Room:
     db.delete(room)
-    db.commit()
-
-    return room
+    return save(db, room)
 
 def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
     if data.room_type is not None:
@@ -82,19 +76,10 @@ def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
     if data.is_active is not None:
         room.is_active = data.is_active
 
-    db.commit()
-    db.refresh(room)
-
-    return room
+    return save(db, room)
 
 def get_available_rooms(db: Session) -> list[Room]:
     return list(db.scalars(select(Room).where(Room.is_active).order_by(Room.room_id)).all())
-
-def room_save(db: Session, room: Room) -> Room:
-    db.commit()
-    db.refresh(room)
-
-    return room
 
 #RESERVATIONS
 def get_all_reservations(db: Session) -> list[Reservation]:
@@ -105,10 +90,7 @@ def get_reservation_by_guest(db: Session, guest_id: int) -> list[Reservation]:
 
 def reservation_create(db: Session, reservation: Reservation) -> Reservation:
     db.add(reservation)
-    db.commit()
-    db.refresh(reservation)
-
-    return reservation
+    return save(db, reservation)
 
 def get_conflicting_reservations(db:Session, room_id: int, new_check_in: date, new_check_out: date) -> Reservation | None:
     return db.scalars(select(Reservation).where(
@@ -123,9 +105,3 @@ def get_reservation_by_id(db: Session, reservation_id: int) -> Reservation | Non
 
 def get_reservations_for_room(db: Session, room_id: int) -> list[Reservation]:
     return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id).order_by(Reservation.reservation_id)).all())
-
-def reservation_save(db: Session, reservation: Reservation) -> Reservation:
-    db.commit()
-    db.refresh(reservation)
-
-    return reservation
