@@ -59,3 +59,7 @@ def register_exception_handlers(app):
     @app.exception_handler(exceptions.CheckOutDatePassedError)
     def check_out_date_passed(_, exc: exceptions.CheckOutDatePassedError):
         return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    @app.exception_handler(exceptions.InvalidPhoneNumberError)
+    def invalid_phone_number(_, exc: exceptions.InvalidPhoneNumberError):
+        return JSONResponse(status_code=422, content={"detail": str(exc)})

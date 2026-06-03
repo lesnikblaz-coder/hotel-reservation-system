@@ -10,9 +10,6 @@ class DuplicateEmailError(Exception):
 class DuplicatePhoneError(Exception):
     pass
 
-class InvalidFieldError(Exception):
-    pass
-
 class NoChangesError(Exception):
     pass
 
@@ -24,7 +21,6 @@ class RoomNotFoundError(Exception):
 
 class ActiveReservationError(Exception):
     pass
-#############
 class ReservationNotFoundError(Exception):
     pass
 
@@ -33,7 +29,7 @@ class InvalidDateFormatError(Exception):
 
 class ConflictingDateError(Exception):
     pass
-###
+
 class InvalidReservationStateError(Exception):
     pass
 
@@ -41,4 +37,7 @@ class InvalidCheckInDateError(Exception):
     pass
 
 class CheckOutDatePassedError(Exception):
+    pass
+
+class InvalidPhoneNumberError(Exception):
     pass
