@@ -34,17 +34,10 @@ def guest_delete(db: Session, guest: Guest) -> Guest:
     return save(db, guest)
 
 def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
-    if data.first_name is not None:
-        guest.first_name = data.first_name
+    update_data = data.model_dump(exclude_unset=True)
 
-    if data.last_name is not None:
-        guest.last_name = data.last_name
-
-    if data.email is not None:
-        guest.email = data.email
-
-    if data.phone is not None:
-        guest.phone = data.phone
+    for field, value in update_data.items():
+        setattr(guest, field, value)
 
     return save(db, guest)
 
@@ -64,17 +57,10 @@ def room_delete(db: Session, room: Room) -> Room:
     return save(db, room)
 
 def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
-    if data.room_type is not None:
-        room.room_type = data.room_type
+    update_data = data.model_dump(exclude_unset=True)
 
-    if data.capacity is not None:
-        room.capacity = data.capacity
-
-    if data.price_per_night is not None:
-        room.price_per_night = data.price_per_night
-
-    if data.is_active is not None:
-        room.is_active = data.is_active
+    for field, value in update_data.items():
+        setattr(room, field, value)
 
     return save(db, room)
 
