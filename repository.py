@@ -7,7 +7,7 @@ from schemas import GuestUpdate, RoomUpdate
 
 #GUESTS
 def get_all_guests(db: Session) -> list[Guest]:
-    return list(db.scalars(select(Guest)).all())
+    return list(db.scalars(select(Guest).order_by(Guest.guest_id)).all())
 
 def get_guest_by_id(db: Session, guest_id: int) -> Guest | None:
     return db.scalars(select(Guest).where(Guest.guest_id == guest_id)).first()
@@ -51,7 +51,7 @@ def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
 
 #ROOMS
 def get_all_rooms(db: Session) -> list[Room]:
-    return list(db.scalars(select(Room)).all())
+    return list(db.scalars(select(Room).order_by(Room.room_id)).all())
 
 def get_room_by_id(db: Session, room_id: int) -> Room | None:
     return db.scalars(select(Room).where(Room.room_id == room_id)).first()
@@ -88,7 +88,7 @@ def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
     return room
 
 def get_available_rooms(db: Session) -> list[Room]:
-    return list(db.scalars(select(Room).where(Room.is_active)).all())
+    return list(db.scalars(select(Room).where(Room.is_active).order_by(Room.room_id)).all())
 
 def room_save(db: Session, room: Room) -> Room:
     db.commit()
@@ -98,10 +98,10 @@ def room_save(db: Session, room: Room) -> Room:
 
 #RESERVATIONS
 def get_all_reservations(db: Session) -> list[Reservation]:
-    return list(db.scalars(select(Reservation)).all())
+    return list(db.scalars(select(Reservation).order_by(Reservation.reservation_id)).all())
 
 def get_reservation_by_guest(db: Session, guest_id: int) -> list[Reservation]:
-    return list(db.scalars(select(Reservation).where(Reservation.guest_id == guest_id)).all())
+    return list(db.scalars(select(Reservation).where(Reservation.guest_id == guest_id).order_by(Reservation.reservation_id)).all())
 
 def reservation_create(db: Session, reservation: Reservation) -> Reservation:
     db.add(reservation)
@@ -122,7 +122,7 @@ def get_reservation_by_id(db: Session, reservation_id: int) -> Reservation | Non
     return db.scalars(select(Reservation).where(Reservation.reservation_id == reservation_id)).first()
 
 def get_reservations_for_room(db: Session, room_id: int) -> list[Reservation]:
-    return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id)).all())
+    return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id).order_by(Reservation.reservation_id)).all())
 
 def reservation_save(db: Session, reservation: Reservation) -> Reservation:
     db.commit()
