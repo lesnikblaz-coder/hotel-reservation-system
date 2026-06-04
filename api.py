@@ -102,6 +102,10 @@ def reservations_get(db: Session = Depends(get_db)) -> list[models.Reservation]:
 def reservation_get(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_select_by_id(db, reservation_id)
 
+@app.put("/reservations/{reservation_id}", response_model=schemas.ReservationResponse)
+def reservation_update(reservation_id: int, request: schemas.ReservationUpdate, db: Session = Depends(get_db)) -> models.Reservation:
+    return reservation_services.reservation_update(db, reservation_id, request)
+
 @app.post("/reservations/{reservation_id}/cancel", response_model=schemas.ReservationResponse)
 def reservation_cancel(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_cancel(db, reservation_id)

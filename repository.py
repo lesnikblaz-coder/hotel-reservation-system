@@ -1,9 +1,11 @@
+from idlelib import query
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from datetime import date
 
 from models import Guest, Room, Reservation
-from schemas import GuestUpdate, RoomUpdate
+from schemas import GuestUpdate, RoomUpdate, ReservationUpdate
 
 # centralized database saving
 def save(db: Session, obj):
@@ -78,13 +80,27 @@ def reservation_create(db: Session, reservation: Reservation) -> Reservation:
     db.add(reservation)
     return save(db, reservation)
 
-def get_conflicting_reservations(db:Session, room_id: int, new_check_in: date, new_check_out: date) -> Reservation | None:
-    return db.scalars(select(Reservation).where(
+def reservation_update(db: Session, reservation: Reservation, data: ReservationUpdate) -> Reservation:
+    update_data = data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(reservation, field, value)
+
+    return save(db, reservation)
+
+def get_conflicting_reservations(db:Session, room_id: int, new_check_in: date, new_check_out: date, exclude_reservation_id: int | None = None) -> Reservation | None:
+    stmt = select(Reservation).where(
         Reservation.room_id == room_id,
         Reservation.status.notin_(["checked_out", "cancelled"]),
         Reservation.check_in_date < new_check_out,
         Reservation.check_out_date > new_check_in
-    )).first()
+    )
+
+    # used when updating -> excluding the reservation itself for correct conflict checks
+    if exclude_reservation_id is not None:
+        stmt = stmt.where(Reservation.reservation_id != exclude_reservation_id)
+
+    return db.scalars(stmt).first()
 
 def get_reservation_by_id(db: Session, reservation_id: int) -> Reservation | None:
     return db.scalars(select(Reservation).where(Reservation.reservation_id == reservation_id)).first()
