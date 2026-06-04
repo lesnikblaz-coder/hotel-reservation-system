@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr, field_validator, Field, ConfigDict
-
+from pydantic import BaseModel, EmailStr, field_validator, model_validator, Field, ConfigDict
 from datetime import date
+
+from exceptions import InvalidPhoneNumberError, ConflictingDateError
 
 # --- shared validator ---
 def validate_phone_number(phone: str | None) -> str | None:
@@ -10,9 +11,16 @@ def validate_phone_number(phone: str | None) -> str | None:
     phone = phone.replace(" ", "")
 
     if not ((phone.startswith("+") and phone[1:].isdigit()) or phone.isdigit()):
-        raise ValueError("Invalid phone number.")
+        raise InvalidPhoneNumberError("Invalid phone number.")
 
     return phone
+
+def validate_dates(check_in_date: date, check_out_date: date) -> None:
+    if check_out_date <= check_in_date:
+        raise ConflictingDateError("Check-out must be after check in.")
+
+    if check_in_date < date.today():
+        raise ConflictingDateError("Check-in cannot be in the past.")
 
 # --- input: creating a guest ---
 class GuestCreate(BaseModel):
@@ -21,6 +29,7 @@ class GuestCreate(BaseModel):
     email: EmailStr
     phone: str
 
+    # validate phone number format
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, phone):
@@ -43,11 +52,11 @@ class GuestUpdate(BaseModel):
     email: EmailStr | None = None
     phone: str | None = None
 
+    # validate phone number format
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, phone):
         return validate_phone_number(phone)
-
 
 # --- rooms ---
 class RoomCreate(BaseModel):
@@ -77,6 +86,12 @@ class ReservationCreate(BaseModel):
     check_in_date: date
     check_out_date: date
 
+    # validate date inputs
+    @model_validator(mode="after")
+    def validate_reservation_dates(self):
+        validate_dates(self.check_in_date, self.check_out_date)
+        return self
+
 class ReservationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -93,3 +108,4 @@ class ReservationUpdate(BaseModel):
     check_in_date: date | None = None
     check_out_date: date | None = None
     status: str | None = None
+    # validate dates in reservation_services because only 1 might get updated.
