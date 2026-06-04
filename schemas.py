@@ -113,3 +113,15 @@ class ReservationUpdate(BaseModel):
 
 class ReservationResponsePrice(BaseModel):
     price: Decimal
+
+
+# --- search available rooms by date range ---
+class RoomAvailabilitySearch(BaseModel):
+    check_in_date: date
+    check_out_date: date
+    capacity: int = 0
+
+    @model_validator(mode="after")
+    def validate_search_dates(self):
+        validate_dates(self.check_in_date, self.check_out_date)
+        return self

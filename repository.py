@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 from models import Guest, Room, Reservation
-from schemas import GuestUpdate, RoomUpdate, ReservationUpdate
+from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch
 
 import enums
 
@@ -66,8 +66,20 @@ def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
 
     return save(db, room)
 
-def get_available_rooms(db: Session) -> list[Room]:
-    return list(db.scalars(select(Room).where(Room.is_active).order_by(Room.room_id)).all())
+def get_available_rooms(db: Session, search: RoomAvailabilitySearch) -> list[Room]:
+    conflicting_room_ids = db.scalars(select(Reservation.room_id).filter(
+        Reservation.check_in_date < search.check_out_date,
+        Reservation.check_out_date > search.check_in_date,
+        Reservation.status.notin_([enums.ReservationStatus.CANCELLED, enums.ReservationStatus.CHECKED_OUT])
+    )).all()
+
+    available_rooms = list(db.scalars(select(Room).filter(
+        Room.is_active.is_(True),
+        Room.room_id.notin_(conflicting_room_ids),
+        Room.capacity >= search.capacity
+    )).all())
+
+    return available_rooms
 
 #RESERVATIONS
 def get_all_reservations(db: Session) -> list[Reservation]:

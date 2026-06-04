@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from decimal import Decimal
 
 from database import Base, engine, get_db
+from schemas import RoomAvailabilitySearch
 from services import guest_services, room_services, reservation_services
 from exception_handlers import register_exception_handlers
 
@@ -59,9 +60,9 @@ def room_create(request: schemas.RoomCreate, db: Session = Depends(get_db)) -> m
 def rooms_get(db: Session = Depends(get_db)) -> list[models.Room]:
     return room_services.rooms_get_all(db)
 
-@app.get("/rooms/available", response_model=list[schemas.RoomResponse])
-def rooms_get_available(db: Session = Depends(get_db)) -> list[models.Room]:
-    return room_services.rooms_get_available(db)
+@app.post("/rooms/available", response_model=list[schemas.RoomResponse])
+def search_available_rooms(search: RoomAvailabilitySearch, db: Session = Depends(get_db)) -> list[models.Room]:
+    return room_services.rooms_get_available(db, search)
 
 @app.get("/rooms/{room_id}", response_model=schemas.RoomResponse)
 def room_get(room_id: int, db: Session = Depends(get_db)) -> models.Room:

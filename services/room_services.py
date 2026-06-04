@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import repository
 
 from models import Room
-from schemas import RoomUpdate
+from schemas import RoomUpdate, RoomAvailabilitySearch
 from constants import VALID_ROOM_TYPES, NON_DELETABLE_STATUSES
 from exceptions import InvalidRoomTypeError, RoomNotFoundError, ActiveReservationError
 
@@ -61,8 +61,8 @@ def room_activate(db: Session, room_id: int) -> Room:
 def rooms_get_all(db: Session) -> list[Room]:
     return repository.get_all_rooms(db)
 
-def rooms_get_available(db: Session) -> list[Room]:
-    available_rooms = repository.get_available_rooms(db)
+def rooms_get_available(db: Session, search: RoomAvailabilitySearch) -> list[Room]:
+    available_rooms = repository.get_available_rooms(db, search)
 
     if not available_rooms:
         raise RoomNotFoundError("No available rooms.")
