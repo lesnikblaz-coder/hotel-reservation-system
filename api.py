@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+from decimal import Decimal
 
 from database import Base, engine, get_db
 from services import guest_services, room_services, reservation_services
@@ -117,3 +118,8 @@ def reservation_check_in(reservation_id: int, db: Session = Depends(get_db)) -> 
 @app.post("/reservations/{reservation_id}/check-out", response_model=schemas.ReservationResponse)
 def reservation_check_out(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_check_out(db, reservation_id)
+
+@app.get("/reservations/{reservation_id}/price", response_model=schemas.ReservationResponsePrice)
+def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> dict[str, Decimal]:
+    price = reservation_services.reservation_price(db, reservation_id)
+    return {"price": price}

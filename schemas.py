@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator, model_validator, Field, ConfigDict
 from datetime import date
+from decimal import Decimal
 
 from exceptions import InvalidPhoneNumberError, ConflictingDateError
 
@@ -109,3 +110,6 @@ class ReservationUpdate(BaseModel):
     check_out_date: date | None = None
     status: str | None = None
     # validate dates in reservation_services because only 1 might get updated.
+
+class ReservationResponsePrice(BaseModel):
+    price: Decimal

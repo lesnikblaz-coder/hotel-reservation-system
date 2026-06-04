@@ -1,6 +1,7 @@
-from sqlalchemy import Integer, String, Float, Boolean, Date, ForeignKey, Sequence
+from sqlalchemy import Integer, String, DECIMAL, Boolean, Date, ForeignKey, Sequence
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date
+from decimal import Decimal
 
 from database import Base
 from constants import CANCELLABLE_STATUSES, CHECKIN_STATUSES, CHECKOUT_STATUSES
@@ -32,7 +33,7 @@ class Room(Base):
     room_number: Mapped[int] = mapped_column(Integer, room_number_seq, server_default=room_number_seq.next_value(), nullable=False, unique=True)
     room_type: Mapped[str] = mapped_column(String, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
-    price_per_night: Mapped[float] = mapped_column(Float, nullable=False)
+    price_per_night: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     reservations: Mapped[list["Reservation"]] = relationship(back_populates="room")
@@ -49,7 +50,7 @@ class Room(Base):
 
         self.is_active = True
 
-    def total_price(self, nights: int) -> float:
+    def total_price(self, nights: int) -> Decimal:
         return self.price_per_night * nights
 
 class Reservation(Base):
@@ -65,19 +66,16 @@ class Reservation(Base):
     guest: Mapped["Guest"] = relationship(back_populates="reservations")
     room: Mapped["Room"] = relationship(back_populates="reservations")
 
-    def duration_nights(self):
-        ci = self.check_in_date
-        co = self.check_out_date
+    def duration_nights(self) -> int:
+        return (self.check_out_date - self.check_in_date).days
 
-        return (co - ci).days
-
-    def cancel(self):
+    def cancel(self) -> None:
         if self.status not in CANCELLABLE_STATUSES:
             raise InvalidReservationStateError("Cannot cancel a reservation that isn't booked.")
 
         self.status = "cancelled"
 
-    def check_in(self):
+    def check_in(self) -> None:
         if self.status not in CHECKIN_STATUSES:
             raise InvalidReservationStateError("Cannot check-in a reservation that isn't booked.")
 
@@ -86,7 +84,7 @@ class Reservation(Base):
 
         self.status = "checked_in"
 
-    def check_out(self):
+    def check_out(self) -> None:
         if self.status not in CHECKOUT_STATUSES:
             raise InvalidReservationStateError("Cannot check-out a reservation that wasn't checked-in yet.")
 
