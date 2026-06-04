@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from decimal import Decimal
 
 import repository
+import enums
 
 from exceptions import RoomNotFoundError, ReservationNotFoundError, ConflictingDateError, GuestNotFoundError, InvalidReservationStateError
 from schemas import ReservationUpdate
@@ -41,7 +42,7 @@ def reservation_create(db: Session, guest_id: int, room_id: int, check_in_date: 
     validate_reservation_dates(check_in_date, check_out_date)
 
     # create a reservation with default status "booked"
-    reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status="booked")
+    reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status=enums.ReservationStatus.BOOKED)
 
     return repository.reservation_create(db, reservation)
 

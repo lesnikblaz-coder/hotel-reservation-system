@@ -4,8 +4,9 @@ from datetime import date
 from decimal import Decimal
 
 from database import Base
-from constants import CANCELLABLE_STATUSES, CHECKIN_STATUSES, CHECKOUT_STATUSES
 from exceptions import InvalidReservationStateError, InvalidCheckInDateError, CheckOutDatePassedError, NoChangesError
+
+import enums
 
 class Guest(Base):
     __tablename__ = "guests"
@@ -61,7 +62,7 @@ class Reservation(Base):
     room_id: Mapped[int] = mapped_column(Integer, ForeignKey("rooms.room_id"), nullable=False)
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
     check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[enums.ReservationStatus] = mapped_column(String, nullable=False)
 
     guest: Mapped["Guest"] = relationship(back_populates="reservations")
     room: Mapped["Room"] = relationship(back_populates="reservations")
@@ -70,25 +71,25 @@ class Reservation(Base):
         return (self.check_out_date - self.check_in_date).days
 
     def cancel(self) -> None:
-        if self.status not in CANCELLABLE_STATUSES:
-            raise InvalidReservationStateError("Cannot cancel a reservation that isn't booked.")
+        if self.status != enums.ReservationStatus.BOOKED:
+            raise InvalidReservationStateError("Only booked reservations can be cancelled.")
 
-        self.status = "cancelled"
+        self.status = enums.ReservationStatus.CANCELLED
 
     def check_in(self) -> None:
-        if self.status not in CHECKIN_STATUSES:
-            raise InvalidReservationStateError("Cannot check-in a reservation that isn't booked.")
+        if self.status != enums.ReservationStatus.BOOKED:
+            raise InvalidReservationStateError("Only booked reservations can be checked in.")
 
         if self.check_in_date != date.today():
-            raise InvalidCheckInDateError(f'Check-in unavailable. Check in date: {self.check_in_date}')
+            raise InvalidCheckInDateError(f'Check-in allowed only on {self.check_in_date}')
 
-        self.status = "checked_in"
+        self.status = enums.ReservationStatus.CHECKED_IN
 
     def check_out(self) -> None:
-        if self.status not in CHECKOUT_STATUSES:
-            raise InvalidReservationStateError("Cannot check-out a reservation that wasn't checked-in yet.")
+        if self.status != enums.ReservationStatus.CHECKED_IN:
+            raise InvalidReservationStateError("Only checked-in reservations can be checked out.")
 
-        if date.today() > self.check_out_date:
-            raise CheckOutDatePassedError("Check-out date has passed.")
+        if date.today() < self.check_in_date:
+            raise CheckOutDatePassedError("Cannot check out before check-in date.")
 
-        self.status = "checked_out"
+        self.status = enums.ReservationStatus.CHECKED_OUT

@@ -1,14 +1,16 @@
+import enums
+
 VALID_STATUSES = {
-    "booked",
-    "checked_in",
-    "checked_out",
-    "cancelled"
+    enums.ReservationStatus.BOOKED,
+    enums.ReservationStatus.CHECKED_IN,
+    enums.ReservationStatus.CHECKED_OUT,
+    enums.ReservationStatus.CANCELLED
 }
 
-CANCELLABLE_STATUSES = {"booked"}
-CHECKIN_STATUSES = {"booked"}
-CHECKOUT_STATUSES = {"checked_in"}
-NON_DELETABLE_STATUSES = {"booked", "checked_in"}
+CANCELLABLE_STATUSES = {enums.ReservationStatus.BOOKED}
+CHECKIN_STATUSES = {enums.ReservationStatus.BOOKED}
+CHECKOUT_STATUSES = {enums.ReservationStatus.CHECKED_IN}
+NON_DELETABLE_STATUSES = {enums.ReservationStatus.BOOKED, enums.ReservationStatus.CHECKED_IN}
 
 VALID_ROOM_TYPES = {
     "single": {

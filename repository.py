@@ -5,6 +5,8 @@ from datetime import date
 from models import Guest, Room, Reservation
 from schemas import GuestUpdate, RoomUpdate, ReservationUpdate
 
+import enums
+
 # centralized database saving
 def save(db: Session, obj):
     db.commit()
@@ -89,7 +91,7 @@ def reservation_update(db: Session, reservation: Reservation, data: ReservationU
 def get_conflicting_reservations(db:Session, room_id: int, new_check_in: date, new_check_out: date, exclude_reservation_id: int | None = None) -> Reservation | None:
     stmt = select(Reservation).where(
         Reservation.room_id == room_id,
-        Reservation.status.notin_(["checked_out", "cancelled"]),
+        Reservation.status.notin_([enums.ReservationStatus.CHECKED_OUT, enums.ReservationStatus.CANCELLED]),
         Reservation.check_in_date < new_check_out,
         Reservation.check_out_date > new_check_in
     )
