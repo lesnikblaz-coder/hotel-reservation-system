@@ -130,3 +130,14 @@ def revenue_report(db: Session, data: RevenueReportRequest) -> Decimal | None:
         Reservation.check_in_date >= data.start_date,
         Reservation.check_out_date <= data.end_date
     ))
+
+def revenue_report_monthly(db: Session):
+    return (db.execute(select(
+        func.date_trunc("month", Reservation.check_in_date).label("month"),
+        func.sum(Reservation.total_price).label("revenue")
+    ).group_by(
+        func.date_trunc("month", Reservation.check_in_date)
+    ).order_by(
+        func.date_trunc("month", Reservation.check_in_date)
+    )
+    ).all())

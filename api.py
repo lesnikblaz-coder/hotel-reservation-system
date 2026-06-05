@@ -123,3 +123,7 @@ def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> sch
 def revenue_report(request: schemas.RevenueReportRequest, db: Session = Depends(get_db)) -> schemas.RevenueReportResponse:
     revenue = report_services.revenue_report(db, request)
     return schemas.RevenueReportResponse(revenue=revenue)
+
+@app.get("/reports/revenue/monthly", response_model=list[schemas.MonthlyRevenueReportResponse])
+def revenue_report_monthly(db: Session = Depends(get_db)) -> list[schemas.MonthlyRevenueReportResponse]:
+    return report_services.revenue_report_monthly(db)

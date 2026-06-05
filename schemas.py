@@ -143,3 +143,7 @@ class RevenueReportRequest(BaseModel):
 
 class RevenueReportResponse(BaseModel):
     revenue: Decimal
+
+class MonthlyRevenueReportResponse(BaseModel):
+    month: date
+    revenue: Decimal
