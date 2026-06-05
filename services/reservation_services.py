@@ -48,7 +48,7 @@ def reservation_create(db: Session, guest_id: int, room_id: int, check_in_date: 
     # create a reservation with default status "booked"
     reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status=enums.ReservationStatus.BOOKED.value)
 
-    #reservation.total_price = room.total_price(reservation.duration_nights())
+    reservation.total_price = room.total_price(reservation.duration_nights())
 
     return repository.reservation_create(db, reservation)
 

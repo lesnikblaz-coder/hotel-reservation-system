@@ -104,6 +104,7 @@ class ReservationResponse(BaseModel):
     check_in_date: date
     check_out_date: date
     status: str
+    total_price: Decimal
 
 class ReservationUpdate(BaseModel):
     guest_id: int | None = None
@@ -133,10 +134,11 @@ class RevenueReportRequest(BaseModel):
     start_date: date
     end_date: date
 
+    # temporary
     @model_validator(mode="after")
     def validate_search_dates(self):
-        validate_dates(self.start_date, self.end_date)
-        return self
+        if self.end_date <= self.start_date:
+            raise ConflictingDateError("End date must be after start date.")
 
 class RevenueReportResponse(BaseModel):
     revenue: Decimal

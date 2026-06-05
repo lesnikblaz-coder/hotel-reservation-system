@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, DECIMAL, Boolean, Date, ForeignKey, Sequence
+from sqlalchemy import Integer, String, DECIMAL, Boolean, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date
 from decimal import Decimal
@@ -61,7 +61,7 @@ class Reservation(Base):
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
     check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[enums.ReservationStatus] = mapped_column(String, nullable=False)
-    #total_price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2))
+    total_price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
 
     guest: Mapped["Guest"] = relationship(back_populates="reservations")
     room: Mapped["Room"] = relationship(back_populates="reservations")
