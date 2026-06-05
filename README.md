@@ -35,6 +35,8 @@ This project started as a command-line application using SQLite and was later re
 
 ## API Endpoints
 
+## API Endpoints
+
 ### Guests
 
 | Method | Endpoint             | Description       |
@@ -47,25 +49,30 @@ This project started as a command-line application using SQLite and was later re
 
 ### Rooms
 
-| Method | Endpoint           | Description         |
-| ------ | ------------------ | ------------------- |
-| GET    | `/rooms`           | Get all rooms       |
-| POST   | `/rooms`           | Create a room       |
-| GET    | `/rooms/available` | Get available rooms |
-| GET    | `/rooms/{room_id}` | Get a room by ID    |
-| PUT    | `/rooms/{room_id}` | Update a room       |
-| DELETE | `/rooms/{room_id}` | Delete a room       |
+| Method | Endpoint                      | Description                             |
+| ------ | ----------------------------- | --------------------------------------- |
+| GET    | `/rooms`                      | Get all rooms                           |
+| POST   | `/rooms`                      | Create a room                           |
+| POST   | `/rooms/availability`         | Search available rooms for a date range |
+| GET    | `/rooms/{room_id}`            | Get a room by ID                        |
+| PUT    | `/rooms/{room_id}`            | Update a room                           |
+| DELETE | `/rooms/{room_id}`            | Delete a room                           |
+| POST   | `/rooms/{room_id}/activate`   | Activate a room                         |
+| POST   | `/rooms/{room_id}/deactivate` | Deactivate a room                       |
 
 ### Reservations
 
-| Method | Endpoint                                   | Description             |
-| ------ | ------------------------------------------ | ----------------------- |
-| GET    | `/reservations`                            | Get all reservations    |
-| POST   | `/reservations`                            | Create a reservation    |
-| GET    | `/reservations/{reservation_id}`           | Get reservation details |
-| PUT    | `/reservations/{reservation_id}/cancel`    | Cancel reservation      |
-| PUT    | `/reservations/{reservation_id}/check-in`  | Check in guest          |
-| PUT    | `/reservations/{reservation_id}/check-out` | Check out guest         |
+| Method | Endpoint                                   | Description                 |
+| ------ | ------------------------------------------ | --------------------------- |
+| GET    | `/reservations`                            | Get all reservations        |
+| POST   | `/reservations`                            | Create a reservation        |
+| GET    | `/reservations/{reservation_id}`           | Get reservation details     |
+| PUT    | `/reservations/{reservation_id}`           | Update a reservation        |
+| POST   | `/reservations/{reservation_id}/cancel`    | Cancel a reservation        |
+| POST   | `/reservations/{reservation_id}/check-in`  | Check in a guest            |
+| POST   | `/reservations/{reservation_id}/check-out` | Check out a guest           |
+| GET    | `/reservations/{reservation_id}/price`     | Calculate reservation price |
+
 
 ## Tech Stack
 
@@ -73,6 +80,7 @@ This project started as a command-line application using SQLite and was later re
 * FastAPI
 * PostgreSQL
 * SQLAlchemy ORM
+* Alembic
 * Pydantic
 * Pytest
 
@@ -86,6 +94,7 @@ This project went through several iterations:
 4. Migrated database storage from SQLite to PostgreSQL.
 5. Converted the application into a FastAPI REST API.
 6. Introduced SQLAlchemy ORM for database modeling and data access.
+7. Added Alembic database migrations for schema versioning and database change management.
 
 ## Architecture
 
@@ -160,6 +169,28 @@ Create a `.env` file:
 DATABASE_URL=postgresql://username:password@localhost:5432/hotel_db
 ```
 
+## Database Migrations
+
+This project uses Alembic for database schema migrations.
+
+Apply all pending migrations:
+
+```bash
+alembic upgrade head
+```
+
+Create a new migration after modifying SQLAlchemy models:
+
+```bash
+alembic revision --autogenerate -m "describe changes"
+```
+
+View migration history:
+
+```bash
+alembic history
+```
+
 ## Running the Application
 
 ```bash
@@ -191,7 +222,6 @@ pytest
 ## Future Improvements
 
 - Expand FastAPI test coverage
-- Add Alembic database migrations
 - JWT Authentication
 - Authorization
 - Role-based access control
