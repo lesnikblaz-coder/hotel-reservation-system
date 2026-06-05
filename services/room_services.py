@@ -5,7 +5,7 @@ import repository
 from models import Room
 from schemas import RoomUpdate, RoomAvailabilitySearch
 from constants import VALID_ROOM_TYPES, NON_DELETABLE_STATUSES
-from exceptions import InvalidRoomTypeError, RoomNotFoundError, ActiveReservationError
+from exceptions import InvalidRoomTypeError, RoomNotFoundError, ActiveReservationError, ConflictingRoomNumberError
 
 def validate_room_type(room_type: str) -> dict[str, int | float]:
     room_data = VALID_ROOM_TYPES.get(room_type)
@@ -15,14 +15,25 @@ def validate_room_type(room_type: str) -> dict[str, int | float]:
 
     return room_data
 
-def room_create(db: Session, room_type: str) -> Room:
+def validate_room_number(db: Session, room_number: int) -> bool:
+    existing_room = repository.get_room_by_number(db, room_number)
+
+    if existing_room:
+        raise ConflictingRoomNumberError("Room number already exists.")
+
+    return True
+
+def room_create(db: Session, room_type: str, room_number: int) -> Room:
     # validate room type existence
     room_data = validate_room_type(room_type)
 
     capacity = room_data["capacity"]
     price_per_night = room_data["price_per_night"]
 
-    room = Room(room_type=room_type, capacity=capacity, price_per_night=price_per_night, is_active=True)
+    # validate room number
+    validate_room_number(db, room_number)
+
+    room = Room(room_type=room_type, room_number=room_number, capacity=capacity, price_per_night=price_per_night, is_active=True)
 
     return repository.room_create(db, room)
 
@@ -74,5 +85,8 @@ def room_update(db: Session, room_id: int, data: RoomUpdate) -> Room:
 
     if data.room_type:
         validate_room_type(data.room_type)
+
+    if data.room_number:
+        validate_room_number(db, data.room_number)
 
     return repository.room_update(db, room, data)

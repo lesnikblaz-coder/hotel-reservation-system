@@ -1,9 +1,9 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from datetime import date
 
 from models import Guest, Room, Reservation
-from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch
+from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch, RevenueReportRequest
 
 import enums
 
@@ -14,7 +14,7 @@ def save(db: Session, obj):
 
     return obj
 
-#GUESTS
+# GUESTS
 def get_all_guests(db: Session) -> list[Guest]:
     return list(db.scalars(select(Guest).order_by(Guest.guest_id)).all())
 
@@ -43,12 +43,15 @@ def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
 
     return save(db, guest)
 
-#ROOMS
+# ROOMS
 def get_all_rooms(db: Session) -> list[Room]:
     return list(db.scalars(select(Room).order_by(Room.room_id)).all())
 
 def get_room_by_id(db: Session, room_id: int) -> Room | None:
     return db.scalars(select(Room).where(Room.room_id == room_id)).first()
+
+def get_room_by_number(db: Session, room_number: int) -> Room | None:
+    return db.scalars(select(Room).where(Room.room_number == room_number)).first()
 
 def room_create(db: Session, room: Room) -> Room:
     db.add(room)
@@ -67,13 +70,13 @@ def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
     return save(db, room)
 
 def get_available_rooms(db: Session, search: RoomAvailabilitySearch) -> list[Room]:
-    conflicting_room_ids = db.scalars(select(Reservation.room_id).filter(
+    conflicting_room_ids = db.scalars(select(Reservation.room_id).where(
         Reservation.check_in_date < search.check_out_date,
         Reservation.check_out_date > search.check_in_date,
         Reservation.status.notin_([enums.ReservationStatus.CANCELLED, enums.ReservationStatus.CHECKED_OUT])
     )).all()
 
-    available_rooms = list(db.scalars(select(Room).filter(
+    available_rooms = list(db.scalars(select(Room).where(
         Room.is_active.is_(True),
         Room.room_id.notin_(conflicting_room_ids),
         Room.capacity >= search.capacity
@@ -81,7 +84,7 @@ def get_available_rooms(db: Session, search: RoomAvailabilitySearch) -> list[Roo
 
     return available_rooms
 
-#RESERVATIONS
+# RESERVATIONS
 def get_all_reservations(db: Session) -> list[Reservation]:
     return list(db.scalars(select(Reservation).order_by(Reservation.reservation_id)).all())
 
@@ -119,3 +122,8 @@ def get_reservation_by_id(db: Session, reservation_id: int) -> Reservation | Non
 
 def get_reservations_for_room(db: Session, room_id: int) -> list[Reservation]:
     return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id).order_by(Reservation.reservation_id)).all())
+
+# REPORTS
+def revenue_report(db: Session, data: RevenueReportRequest):
+    pass
+    #return db.scalars(func.sum(Reservation.total_price

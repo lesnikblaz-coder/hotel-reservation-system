@@ -41,3 +41,6 @@ class CheckOutDatePassedError(Exception):
 
 class InvalidPhoneNumberError(Exception):
     pass
+
+class ConflictingRoomNumberError(Exception):
+    pass

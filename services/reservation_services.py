@@ -7,7 +7,7 @@ import enums
 
 from exceptions import RoomNotFoundError, ReservationNotFoundError, ConflictingDateError, GuestNotFoundError, InvalidReservationStateError
 from schemas import ReservationUpdate
-from models import Reservation
+from models import Reservation, Room
 
 def validate_reservation_dates(check_in_date: date, check_out_date: date):
     if check_out_date <= check_in_date:
@@ -19,9 +19,13 @@ def validate_guest_exists(db: Session, guest_id: int) -> None:
     if not repository.get_guest_by_id(db, guest_id):
         raise GuestNotFoundError("Invalid guest ID.")
 
-def validate_room_exists(db: Session, room_id: int) -> None:
-    if not repository.get_room_by_id(db, room_id):
+def validate_room_exists(db: Session, room_id: int) -> Room:
+    room = repository.get_room_by_id(db, room_id)
+
+    if not room:
         raise RoomNotFoundError("Invalid room ID.")
+
+    return room
 
 def validate_room_availability(db: Session, room_id: int, check_in: date, check_out: date, exclude_reservation_id: int | None = None) -> None:
     conflict = repository.get_conflicting_reservations(db, room_id, check_in, check_out, exclude_reservation_id)
@@ -33,7 +37,7 @@ def reservation_create(db: Session, guest_id: int, room_id: int, check_in_date: 
     validate_guest_exists(db, guest_id)
 
     # check room existence
-    validate_room_exists(db, room_id)
+    room = validate_room_exists(db, room_id)
 
     # check if the room is already booked on those dates.
     validate_room_availability(db, room_id, check_in_date, check_out_date)
@@ -42,7 +46,9 @@ def reservation_create(db: Session, guest_id: int, room_id: int, check_in_date: 
     validate_reservation_dates(check_in_date, check_out_date)
 
     # create a reservation with default status "booked"
-    reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status=enums.ReservationStatus.BOOKED)
+    reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status=enums.ReservationStatus.BOOKED.value)
+
+    #reservation.total_price = room.total_price(reservation.duration_nights())
 
     return repository.reservation_create(db, reservation)
 

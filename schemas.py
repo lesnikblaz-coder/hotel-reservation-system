@@ -62,6 +62,7 @@ class GuestUpdate(BaseModel):
 # --- rooms ---
 class RoomCreate(BaseModel):
     room_type: str
+    room_number: int
 
 class RoomResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -75,6 +76,7 @@ class RoomResponse(BaseModel):
 
 class RoomUpdate(BaseModel):
     room_type: str | None = None
+    room_number: int | None = None
     capacity: int | None = Field(default = None, ge=2, le=12)
     price_per_night: float | None = Field(default = None, ge=99.99, le=1299.99)
     is_active: bool | None = None
@@ -125,3 +127,16 @@ class RoomAvailabilitySearch(BaseModel):
     def validate_search_dates(self):
         validate_dates(self.check_in_date, self.check_out_date)
         return self
+
+# --- revenue reports ---
+class RevenueReportRequest(BaseModel):
+    start_date: date
+    end_date: date
+
+    @model_validator(mode="after")
+    def validate_search_dates(self):
+        validate_dates(self.start_date, self.end_date)
+        return self
+
+class RevenueReportResponse(BaseModel):
+    revenue: Decimal

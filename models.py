@@ -28,10 +28,8 @@ class Guest(Base):
 class Room(Base):
     __tablename__ = "rooms"
 
-    room_number_seq = Sequence("room_number_seq", start=1000)
-
     room_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    room_number: Mapped[int] = mapped_column(Integer, room_number_seq, server_default=room_number_seq.next_value(), nullable=False, unique=True)
+    room_number: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
     room_type: Mapped[str] = mapped_column(String, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     price_per_night: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
@@ -63,6 +61,7 @@ class Reservation(Base):
     check_in_date: Mapped[date] = mapped_column(Date, nullable=False)
     check_out_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[enums.ReservationStatus] = mapped_column(String, nullable=False)
+    #total_price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2))
 
     guest: Mapped["Guest"] = relationship(back_populates="reservations")
     room: Mapped["Room"] = relationship(back_populates="reservations")
