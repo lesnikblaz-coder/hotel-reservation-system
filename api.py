@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from decimal import Decimal
 
 from database import get_db
 from services import guest_services, room_services, reservation_services, report_services
@@ -122,3 +121,7 @@ def revenue_report(request: schemas.RevenueReportRequest, db: Session = Depends(
 @app.get("/reports/revenue/monthly", response_model=list[schemas.MonthlyRevenueReportResponse])
 def revenue_report_monthly(db: Session = Depends(get_db)) -> list[schemas.MonthlyRevenueReportResponse]:
     return report_services.revenue_report_monthly(db)
+
+@app.get("/reports/revenue/yearly", response_model=list[schemas.YearlyRevenueReportResponse])
+def revenue_report_yearly(db: Session = Depends(get_db)) -> list[schemas.YearlyRevenueReportResponse]:
+    return report_services.revenue_report_yearly(db)

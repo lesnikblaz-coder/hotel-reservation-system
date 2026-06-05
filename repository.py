@@ -132,12 +132,21 @@ def revenue_report(db: Session, data: RevenueReportRequest) -> Decimal | None:
     ))
 
 def revenue_report_monthly(db: Session):
-    return (db.execute(select(
+    return db.execute(select(
         func.date_trunc("month", Reservation.check_in_date).label("month"),
         func.sum(Reservation.total_price).label("revenue")
     ).group_by(
         func.date_trunc("month", Reservation.check_in_date)
     ).order_by(
         func.date_trunc("month", Reservation.check_in_date)
-    )
-    ).all())
+    )).all()
+
+def revenue_report_yearly(db: Session):
+    return db.execute(select(
+        func.date_trunc("year", Reservation.check_in_date).label("year"),
+        func.sum(Reservation.total_price).label("revenue")
+    ).group_by(
+        func.date_trunc("year", Reservation.check_in_date)
+    ).order_by(
+        func.date_trunc("year", Reservation.check_in_date)
+    )).all()
