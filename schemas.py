@@ -114,9 +114,6 @@ class ReservationUpdate(BaseModel):
     status: str | None = None
     # validate dates in reservation_services because only 1 might get updated.
 
-class ReservationResponsePrice(BaseModel):
-    price: Decimal
-
 
 # --- search available rooms by date range ---
 class RoomAvailabilitySearch(BaseModel):

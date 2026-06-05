@@ -112,11 +112,6 @@ def reservation_check_in(reservation_id: int, db: Session = Depends(get_db)) -> 
 def reservation_check_out(reservation_id: int, db: Session = Depends(get_db)) -> models.Reservation:
     return reservation_services.reservation_check_out(db, reservation_id)
 
-@app.get("/reservations/{reservation_id}/price", response_model=schemas.ReservationResponsePrice)
-def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> schemas.ReservationResponsePrice:
-    price = reservation_services.reservation_price(db, reservation_id)
-    return schemas.ReservationResponsePrice(price=price)
-
 # --- REPORTS ---
 # --- revenue ---
 @app.post("/reports/revenue", response_model=schemas.RevenueReportResponse)

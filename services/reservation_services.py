@@ -1,6 +1,5 @@
 from datetime import date
 from sqlalchemy.orm import Session
-from decimal import Decimal
 
 import repository
 import enums
@@ -84,16 +83,6 @@ def reservation_select_by_id(db: Session, reservation_id: int) -> Reservation:
         raise ReservationNotFoundError("Reservation doesn't exist.")
 
     return reservation
-
-def reservation_price(db: Session, reservation_id: int) -> Decimal:
-    reservation = reservation_select_by_id(db, reservation_id)
-
-    room = repository.get_room_by_id(db, reservation.room_id)
-
-    if room is None:
-        raise RoomNotFoundError("Invalid room ID.")
-
-    return room.total_price(reservation.duration_nights())
 
 def reservation_cancel(db: Session, reservation_id: int) -> Reservation:
     reservation = reservation_select_by_id(db, reservation_id)
