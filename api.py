@@ -1,22 +1,15 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from decimal import Decimal
 
-from database import Base, engine, get_db
-from schemas import RoomAvailabilitySearch
-from services import guest_services, room_services, reservation_services
+from database import get_db
+from schemas import RoomAvailabilitySearch, RevenueReportRequest
+from services import guest_services, room_services, reservation_services, report_services
 from exception_handlers import register_exception_handlers
 
 import schemas, models
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    # startup code
-    Base.metadata.create_all(bind=engine) # table creation
-    yield
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 register_exception_handlers(app)
 
 @app.get("/", include_in_schema=False)
@@ -54,13 +47,13 @@ def guest_delete(guest_id: int, db: Session = Depends(get_db)) -> None:
 # --- rooms ---
 @app.post("/rooms", status_code=201, response_model=schemas.RoomResponse)
 def room_create(request: schemas.RoomCreate, db: Session = Depends(get_db)) -> models.Room:
-    return room_services.room_create(db, request.room_type)
+    return room_services.room_create(db, request.room_type, request.room_number)
 
 @app.get("/rooms", response_model=list[schemas.RoomResponse])
 def rooms_get(db: Session = Depends(get_db)) -> list[models.Room]:
     return room_services.rooms_get_all(db)
 
-@app.post("/rooms/available", response_model=list[schemas.RoomResponse])
+@app.post("/rooms/availability", response_model=list[schemas.RoomResponse])
 def search_available_rooms(search: RoomAvailabilitySearch, db: Session = Depends(get_db)) -> list[models.Room]:
     return room_services.rooms_get_available(db, search)
 
@@ -124,3 +117,9 @@ def reservation_check_out(reservation_id: int, db: Session = Depends(get_db)) ->
 def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> dict[str, Decimal]:
     price = reservation_services.reservation_price(db, reservation_id)
     return {"price": price}
+
+# --- REPORTS ---
+# --- revenue ---
+@app.post("/reports/revenue", response_model=schemas.RevenueReportResponse)
+def revenue_report(request: RevenueReportRequest, db: Session = Depends(get_db)) -> schemas.RevenueReportResponse:
+    return report_services.revenue_report(db, request)
