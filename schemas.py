@@ -139,6 +139,7 @@ class RevenueReportRequest(BaseModel):
     def validate_search_dates(self):
         if self.end_date <= self.start_date:
             raise ConflictingDateError("End date must be after start date.")
+        return self
 
 class RevenueReportResponse(BaseModel):
     revenue: Decimal

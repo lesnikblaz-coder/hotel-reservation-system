@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from decimal import Decimal
 
 from database import get_db
-from schemas import RoomAvailabilitySearch, RevenueReportRequest
 from services import guest_services, room_services, reservation_services, report_services
 from exception_handlers import register_exception_handlers
 
@@ -54,7 +53,7 @@ def rooms_get(db: Session = Depends(get_db)) -> list[models.Room]:
     return room_services.rooms_get_all(db)
 
 @app.post("/rooms/availability", response_model=list[schemas.RoomResponse])
-def search_available_rooms(search: RoomAvailabilitySearch, db: Session = Depends(get_db)) -> list[models.Room]:
+def search_available_rooms(search: schemas.RoomAvailabilitySearch, db: Session = Depends(get_db)) -> list[models.Room]:
     return room_services.rooms_get_available(db, search)
 
 @app.get("/rooms/{room_id}", response_model=schemas.RoomResponse)
@@ -114,12 +113,13 @@ def reservation_check_out(reservation_id: int, db: Session = Depends(get_db)) ->
     return reservation_services.reservation_check_out(db, reservation_id)
 
 @app.get("/reservations/{reservation_id}/price", response_model=schemas.ReservationResponsePrice)
-def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> dict[str, Decimal]:
+def reservation_price(reservation_id: int, db: Session = Depends(get_db)) -> schemas.ReservationResponsePrice:
     price = reservation_services.reservation_price(db, reservation_id)
-    return {"price": price}
+    return schemas.ReservationResponsePrice(price=price)
 
 # --- REPORTS ---
 # --- revenue ---
 @app.post("/reports/revenue", response_model=schemas.RevenueReportResponse)
-def revenue_report(request: RevenueReportRequest, db: Session = Depends(get_db)) -> schemas.RevenueReportResponse:
-    return report_services.revenue_report(db, request)
+def revenue_report(request: schemas.RevenueReportRequest, db: Session = Depends(get_db)) -> schemas.RevenueReportResponse:
+    revenue = report_services.revenue_report(db, request)
+    return schemas.RevenueReportResponse(revenue=revenue)

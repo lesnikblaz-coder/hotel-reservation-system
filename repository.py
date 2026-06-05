@@ -1,6 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from datetime import date
+from decimal import Decimal
 
 from models import Guest, Room, Reservation
 from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch, RevenueReportRequest
@@ -124,6 +125,8 @@ def get_reservations_for_room(db: Session, room_id: int) -> list[Reservation]:
     return list(db.scalars(select(Reservation).where(Reservation.room_id == room_id).order_by(Reservation.reservation_id)).all())
 
 # REPORTS
-def revenue_report(db: Session, data: RevenueReportRequest):
-    pass
-    #return db.scalars(func.sum(Reservation.total_price
+def revenue_report(db: Session, data: RevenueReportRequest) -> Decimal | None:
+    return db.scalar(select(func.sum(Reservation.total_price)).where(
+        Reservation.check_in_date >= data.start_date,
+        Reservation.check_out_date <= data.end_date
+    ))
