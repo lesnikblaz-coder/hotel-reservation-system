@@ -150,3 +150,13 @@ def revenue_report_yearly(db: Session):
     ).order_by(
         func.date_trunc("year", Reservation.check_in_date)
     )).all()
+
+def get_total_rooms(db: Session):
+    return db.scalar(select(func.count()).select_from(Room).where(Room.is_active.is_(True)))
+
+def get_occupied_rooms(db: Session):
+    return db.scalar(select(func.count()).select_from(Reservation).where(
+        Reservation.check_in_date <= date.today(),
+        Reservation.check_out_date > date.today(),
+        Reservation.status.notin_([enums.ReservationStatus.CANCELLED, enums.ReservationStatus.CHECKED_OUT])
+    ))

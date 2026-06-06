@@ -148,3 +148,8 @@ class MonthlyRevenueReportResponse(BaseModel):
 class YearlyRevenueReportResponse(BaseModel):
     year: date
     revenue: Decimal
+
+class OccupancyReportResponse(BaseModel):
+    total_rooms: int
+    occupied_rooms: int
+    occupancy_percentage: float
