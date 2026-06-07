@@ -153,3 +153,12 @@ class OccupancyReportResponse(BaseModel):
     total_rooms: int
     occupied_rooms: int
     occupancy_percentage: float
+
+class OccupancyReportRequest(BaseModel):
+    month_start: date
+    month_end: date
+
+class MonthlyOccupancyReportResponse(BaseModel):
+    available_room_nights: int
+    occupied_room_nights: int
+    occupancy_percentage: float

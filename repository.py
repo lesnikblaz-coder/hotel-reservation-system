@@ -1,6 +1,6 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from models import Guest, Room, Reservation
@@ -151,7 +151,7 @@ def revenue_report_yearly(db: Session):
         func.date_trunc("year", Reservation.check_in_date)
     )).all()
 
-def get_total_rooms(db: Session):
+def active_room_count(db: Session):
     return db.scalar(select(func.count()).select_from(Room).where(Room.is_active.is_(True)))
 
 def get_occupied_rooms(db: Session):
@@ -160,3 +160,9 @@ def get_occupied_rooms(db: Session):
         Reservation.check_out_date > date.today(),
         Reservation.status.notin_([enums.ReservationStatus.CANCELLED, enums.ReservationStatus.CHECKED_OUT])
     ))
+
+def reservations_for_month(db: Session, month_start: date, month_end: date) -> list[Reservation]:
+    return list(db.scalars(select(Reservation).where(
+        Reservation.check_in_date < month_end,
+        Reservation.check_out_date > month_start
+    )).all())

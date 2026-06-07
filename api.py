@@ -129,3 +129,7 @@ def revenue_report_yearly(db: Session = Depends(get_db)) -> list[schemas.YearlyR
 @app.get("/reports/occupancy/today", response_model=schemas.OccupancyReportResponse)
 def occupancy_report(db: Session = Depends(get_db)) -> schemas.OccupancyReportResponse:
     return report_services.occupancy_report(db)
+
+@app.post("/reports/occupancy/monthly", response_model=schemas.MonthlyOccupancyReportResponse)
+def occupancy_report_monthly(request: schemas.OccupancyReportRequest, db: Session = Depends(get_db)) -> schemas.MonthlyOccupancyReportResponse:
+    return report_services.occupancy_report_monthly(db, request)
