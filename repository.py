@@ -1,6 +1,6 @@
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 from models import Guest, Room, Reservation
@@ -34,7 +34,8 @@ def guest_create(db: Session, guest: Guest) -> Guest:
 
 def guest_delete(db: Session, guest: Guest) -> Guest:
     db.delete(guest)
-    return save(db, guest)
+    db.commit()
+    return guest
 
 def guest_update(db: Session, guest: Guest, data: GuestUpdate) -> Guest:
     update_data = data.model_dump(exclude_unset=True)
@@ -60,7 +61,8 @@ def room_create(db: Session, room: Room) -> Room:
 
 def room_delete(db: Session, room: Room) -> Room:
     db.delete(room)
-    return save(db, room)
+    db.commit()
+    return room
 
 def room_update(db: Session, room: Room, data: RoomUpdate) -> Room:
     update_data = data.model_dump(exclude_unset=True)
