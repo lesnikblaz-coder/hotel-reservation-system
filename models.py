@@ -20,7 +20,12 @@ class Guest(Base):
     reservations: Mapped[list["Reservation"]] = relationship(back_populates="guest")
 
     def __repr__(self):
-        return f'<Guest(guest_id={self.guest_id}, email={self.email})>'
+        return (f'<Guest(guest_id={self.guest_id}, '
+                f'first_name={self.first_name}, '
+                f'last_name={self.last_name}, '
+                f'email={self.email}, '
+                f'phone={self.phone}'
+                f')>')
 
     def full_name(self) -> str:
         return f'{self.first_name} {self.last_name}'
@@ -36,6 +41,15 @@ class Room(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     reservations: Mapped[list["Reservation"]] = relationship(back_populates="room")
+
+    def __repr__(self):
+        return (f'<Room(room_id={self.room_id}, '
+                f'room_number={self.room_number}, '
+                f'room_type={self.room_type}, '
+                f'capacity={self.capacity}, '
+                f'price_per_night={self.price_per_night}, '
+                f'is_active={self.is_active}'
+                f')>')
 
     def deactivate(self) -> None:
         if not self.is_active:
@@ -65,6 +79,16 @@ class Reservation(Base):
 
     guest: Mapped["Guest"] = relationship(back_populates="reservations")
     room: Mapped["Room"] = relationship(back_populates="reservations")
+
+    def __repr__(self):
+        return (f'<Reservation(reservation_id={self.reservation_id}, '
+                f'guest_id={self.guest_id}, '
+                f'room_id={self.room_id}, '
+                f'check_in_date={self.check_in_date}, '
+                f'check_out_date={self.check_out_date}, '
+                f'status={self.status}, '
+                f'total_price={self.total_price}'
+                f')>')
 
     def duration_nights(self) -> int:
         return (self.check_out_date - self.check_in_date).days
