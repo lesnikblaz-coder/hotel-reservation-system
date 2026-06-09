@@ -1,4 +1,5 @@
 import enums
+from decimal import Decimal
 
 VALID_STATUSES = {
     enums.ReservationStatus.BOOKED.value,
@@ -15,15 +16,15 @@ NON_DELETABLE_STATUSES = {enums.ReservationStatus.BOOKED.value, enums.Reservatio
 VALID_ROOM_TYPES = {
     "single": {
         "capacity": 3,
-        "price_per_night": 99.99
+        "price_per_night": Decimal("99.99")
     },
     "double": {
         "capacity": 5,
-        "price_per_night": 179.99
+        "price_per_night": Decimal("179.99")
     },
     "suite": {
         "capacity": 8,
-        "price_per_night": 349.99
+        "price_per_night": Decimal("349.99")
     }
 }
 
