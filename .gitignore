@@ -8,9 +8,7 @@ __pycache__/
 
 # Environment variables
 .env
+.env.test
 
 # Local notes
 ideas.txt
-
-# Database
-hotel_reservation_system.db
