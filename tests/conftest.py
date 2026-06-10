@@ -48,46 +48,38 @@ def client(test_db):
     app.dependency_overrides.clear()
 
 @pytest.fixture()
-def guest_payload():
-    return {
+def create_guest(client):
+    payload = {
         "first_name": "Storm",
         "last_name": "Test",
         "email": "storm@test.com",
         "phone": "123456"
     }
 
+    response = client.post("/guests", json=payload)
+    assert response.status_code == 201
+    return response.json()
+
 @pytest.fixture()
-def room_payload():
-    return {
+def create_room(client):
+    payload = {
         "room_type": "double",
         "room_number": 201
     }
 
-@pytest.fixture()
-def reservation_payload():
-    check_in = date.today()
+    response = client.post("/rooms", json=payload)
+    assert response.status_code == 201
+    return response.json()
 
-    return {
-        "guest_id": 1,
-        "room_id": 1,
-        "check_in_date": check_in.isoformat(),
-        "check_out_date": (check_in + timedelta(days=7)).isoformat()
+@pytest.fixture()
+def create_reservation(client, create_guest, create_room):
+    payload = {
+        "guest_id": create_guest["guest_id"],
+        "room_id": create_room["room_id"],
+        "check_in_date": date.today().isoformat(),
+        "check_out_date": (date.today() + timedelta(days=7)).isoformat()
     }
 
-@pytest.fixture()
-def create_guest(client, guest_payload):
-    response = client.post("/guests", json=guest_payload)
-    assert response.status_code == 201
-    return response.json()
-
-@pytest.fixture()
-def create_room(client, room_payload):
-    response = client.post("/rooms", json=room_payload)
-    assert response.status_code == 201
-    return response.json()
-
-@pytest.fixture()
-def create_reservation(client, reservation_payload):
-    response = client.post("/reservations", json=reservation_payload)
+    response = client.post("/reservations", json=payload)
     assert response.status_code == 201
     return response.json()
