@@ -4,75 +4,127 @@ A hotel reservation management API built with FastAPI, PostgreSQL, and SQLAlchem
 
 This project started as a command-line application using SQLite and was later refactored into a REST API using FastAPI and PostgreSQL as part of my backend development learning journey.
 
-### Features
+## Features
 
 ### Guest Management
 
-* Create guests
-* View all guests
-* Retrieve guest details
-* Update guest information
-* Delete guests
+- Create guests
+- View all guests
+- Retrieve guest details
+- Update guest information
+- Delete guests
 
 ### Room Management
 
-* Create rooms
-* View all rooms
-* Retrieve room details
-* Update room information
-* Delete rooms
-* Check room availability
+- Create rooms
+- View all rooms
+- Retrieve room details
+- Update room information
+- Delete rooms
+- Activate/deactivate rooms
+- Search room availability for a date range
 
 ### Reservation Management
 
-* Create reservations
-* View all reservations
-* Retrieve reservation details
-* Cancel reservations
-* Check guests in
-* Check guests out
-* Prevents overlapping reservations for the same room
+- Create reservations
+- View all reservations
+- Retrieve reservation details
+- Update reservations
+- Cancel reservations
+- Check guests in
+- Check guests out
+- Prevent overlapping reservations for the same room
 
-## API Endpoints
+### Reporting & Analytics
+
+- Revenue reports for custom date ranges
+- Monthly revenue reports
+- Yearly revenue reports
+- Current occupancy reports
+- Monthly occupancy reports
+
+### Testing
+
+- Comprehensive FastAPI endpoint test suite
+- Positive and negative test cases
+- Request validation testing
+- Error handling verification
+- Isolated test database setup using pytest fixtures
 
 ## API Endpoints
 
 ### Guests
 
-| Method | Endpoint             | Description       |
-| ------ | -------------------- | ----------------- |
-| GET    | `/guests`            | Get all guests    |
-| POST   | `/guests`            | Create a guest    |
-| GET    | `/guests/{guest_id}` | Get a guest by ID |
-| PUT    | `/guests/{guest_id}` | Update a guest    |
-| DELETE | `/guests/{guest_id}` | Delete a guest    |
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/guests` | Get all guests |
+| POST | `/guests` | Create a guest |
+| GET | `/guests/{guest_id}` | Get a guest by ID |
+| PUT | `/guests/{guest_id}` | Update a guest |
+| DELETE | `/guests/{guest_id}` | Delete a guest |
 
 ### Rooms
 
-| Method | Endpoint                      | Description                             |
-| ------ | ----------------------------- | --------------------------------------- |
-| GET    | `/rooms`                      | Get all rooms                           |
-| POST   | `/rooms`                      | Create a room                           |
-| POST   | `/rooms/availability`         | Search available rooms for a date range |
-| GET    | `/rooms/{room_id}`            | Get a room by ID                        |
-| PUT    | `/rooms/{room_id}`            | Update a room                           |
-| DELETE | `/rooms/{room_id}`            | Delete a room                           |
-| POST   | `/rooms/{room_id}/activate`   | Activate a room                         |
-| POST   | `/rooms/{room_id}/deactivate` | Deactivate a room                       |
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/rooms` | Get all rooms |
+| POST | `/rooms` | Create a room |
+| POST | `/rooms/availability` | Search available rooms |
+| GET | `/rooms/{room_id}` | Get room details |
+| PUT | `/rooms/{room_id}` | Update a room |
+| DELETE | `/rooms/{room_id}` | Delete a room |
+| POST | `/rooms/{room_id}/activate` | Activate a room |
+| POST | `/rooms/{room_id}/deactivate` | Deactivate a room |
 
 ### Reservations
 
-| Method | Endpoint                                   | Description                 |
-| ------ | ------------------------------------------ | --------------------------- |
-| GET    | `/reservations`                            | Get all reservations        |
-| POST   | `/reservations`                            | Create a reservation        |
-| GET    | `/reservations/{reservation_id}`           | Get reservation details     |
-| PUT    | `/reservations/{reservation_id}`           | Update a reservation        |
-| POST   | `/reservations/{reservation_id}/cancel`    | Cancel a reservation        |
-| POST   | `/reservations/{reservation_id}/check-in`  | Check in a guest            |
-| POST   | `/reservations/{reservation_id}/check-out` | Check out a guest           |
-| GET    | `/reservations/{reservation_id}/price`     | Calculate reservation price |
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/reservations` | Get all reservations |
+| POST | `/reservations` | Create a reservation |
+| GET | `/reservations/{reservation_id}` | Get reservation details |
+| PUT | `/reservations/{reservation_id}` | Update a reservation |
+| POST | `/reservations/{reservation_id}/cancel` | Cancel a reservation |
+| POST | `/reservations/{reservation_id}/check-in` | Check in a guest |
+| POST | `/reservations/{reservation_id}/check-out` | Check out a guest |
 
+### Reports
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/reports/revenue` | Revenue report for a date range |
+| GET | `/reports/revenue/monthly` | Monthly revenue report |
+| GET | `/reports/revenue/yearly` | Yearly revenue report |
+| GET | `/reports/occupancy/today` | Current occupancy report |
+| POST | `/reports/occupancy/monthly` | Monthly occupancy report |
+
+## Testing
+
+The project includes a comprehensive automated test suite built with Pytest and FastAPI's TestClient.
+
+### Coverage Includes
+
+- All guest endpoints
+- All room endpoints
+- All reservation endpoints
+- All reporting endpoints
+- Request validation
+- Invalid input handling
+- Business rule enforcement
+- Error responses
+- Reservation conflict detection
+- Check-in/check-out workflows
+
+### Test Structure
+
+```text
+tests/
+├── conftest.py
+├── test_guest.py
+├── test_room.py
+├── test_reservation.py
+└── test_reports.py
+```
 
 ## Tech Stack
 
@@ -94,7 +146,25 @@ This project went through several iterations:
 4. Migrated database storage from SQLite to PostgreSQL.
 5. Converted the application into a FastAPI REST API.
 6. Introduced SQLAlchemy ORM for database modeling and data access.
-7. Added Alembic database migrations for schema versioning and database change management.
+7. Added Alembic database migrations for schema versioning.
+8. Implemented reporting and analytics endpoints.
+9. Added comprehensive automated API testing with Pytest.
+
+## API Documentation
+
+FastAPI automatically generates interactive OpenAPI documentation for all endpoints, request schemas, and response models.
+
+### Swagger UI
+
+![Swagger UI - Part 1](images/fastapi-docs-1.png)
+
+![Swagger UI - Part 2](images/fastapi-docs-2.png)
+
+Once the application is running, the interactive API documentation is available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
 
 ## Architecture
 
@@ -126,7 +196,6 @@ The application is organized into separate layers to improve maintainability and
 
 * `exceptions.py` defines custom application exceptions.
 * `exception_handlers.py` converts application exceptions into appropriate HTTP responses.
-
 
 ## Installation
 
@@ -197,7 +266,7 @@ alembic history
 uvicorn api:app --reload
 ```
 
-API documentation:
+## API Documentation:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -206,7 +275,7 @@ http://127.0.0.1:8000/docs
 ## Running Tests
 
 ```bash
-pytest
+python -m pytest -v
 ```
 
 ## Key Learning Outcomes
@@ -221,7 +290,6 @@ pytest
 
 ## Future Improvements
 
-- Expand FastAPI test coverage
 - JWT Authentication
 - Authorization
 - Role-based access control
