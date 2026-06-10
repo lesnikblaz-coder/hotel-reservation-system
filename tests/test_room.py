@@ -72,7 +72,7 @@ def test_get_rooms(client, create_room):
     assert response.status_code == 200
 
     data = response.json()
-    assert data[0]["room_id"] == 1
+    assert data[0]["room_id"] == create_room["room_id"]
 
 def test_get_available_rooms(client, create_guest, create_room, create_reservation):
     # must create_guest and create_room so the IDs are valid
@@ -97,7 +97,7 @@ def test_get_room_id(client, create_room):
     assert response.status_code == 200
 
     data = response.json()
-    assert data["room_id"] == 1
+    assert data["room_id"] == room_id
 
 def test_get_nonexistent_room(client):
     response = client.get(f"/rooms/99999")
@@ -136,6 +136,7 @@ def test_activate_room(client, create_room, test_db):
     assert room is not None
 
     room.activate()
+    assert room.is_active == True
 
 def test_deactivate_room(client, create_room, test_db):
     room_id = create_room["room_id"]
@@ -143,6 +144,7 @@ def test_deactivate_room(client, create_room, test_db):
     assert room is not None
 
     room.deactivate()
+    assert room.is_active == False
 
 def test_activate_already_active_room(client, create_room, test_db):
     room_id = create_room["room_id"]
@@ -156,6 +158,8 @@ def test_deactivate_already_inactive_room(client, create_room, test_db):
     room_id = create_room["room_id"]
     room = test_db.scalar(select(Room).where(Room.room_id == room_id))
     room.is_active = False  # make room inactive
+    test_db.commit()
+
     assert room is not None
 
     with pytest.raises(NoChangesError):

@@ -76,7 +76,7 @@ def test_get_reservations(client, create_reservation):
     assert response.status_code == 200
 
     data = response.json()
-    assert data[0]["reservation_id"] == 1
+    assert data[0]["reservation_id"] == create_reservation["reservation_id"]
 
 def test_get_reservation_id(client, create_reservation):
     reservation_id = create_reservation["reservation_id"]
@@ -84,7 +84,7 @@ def test_get_reservation_id(client, create_reservation):
     assert response.status_code == 200
 
     data = response.json()
-    assert data["reservation_id"] == 1
+    assert data["reservation_id"] == reservation_id
 
 def test_update_reservation(client, create_reservation):
     reservation_id = create_reservation["reservation_id"]
@@ -110,6 +110,7 @@ def test_invalid_cancel_reservation(client, create_reservation, test_db):
     reservation_id = create_reservation["reservation_id"]
     reservation = test_db.scalar(select(Reservation).where(Reservation.reservation_id == reservation_id))
     reservation.status = enums.ReservationStatus.CHECKED_IN  # make reservation's status "checked_in" for invalid cancel
+    test_db.commit()
 
     response = client.post(f"/reservations/{reservation.reservation_id}/cancel")
 
@@ -128,6 +129,7 @@ def test_invalid_check_in_date(client, create_reservation, test_db):
     reservation_id = create_reservation["reservation_id"]
     reservation = test_db.scalar(select(Reservation).where(Reservation.reservation_id == reservation_id))
     reservation.check_in_date = (date.today() + timedelta(days=2))  # make reservation's check in date > today's date for unallowed check in
+    test_db.commit()
 
     response = client.post(f"/reservations/{reservation.reservation_id}/check-in")
 
@@ -138,6 +140,7 @@ def test_invalid_check_in_status(client, create_reservation, test_db):
     reservation_id = create_reservation["reservation_id"]
     reservation = test_db.scalar(select(Reservation).where(Reservation.reservation_id == reservation_id))
     reservation.status = enums.ReservationStatus.CHECKED_OUT  # make reservation's status "checked_out" for invalid check in
+    test_db.commit()
 
     response = client.post(f"/reservations/{reservation.reservation_id}/check-in")
 
@@ -148,6 +151,7 @@ def test_check_out_reservation(client, create_reservation, test_db):
     reservation_id = create_reservation["reservation_id"]
     reservation = test_db.scalar(select(Reservation).where(Reservation.reservation_id == reservation_id))
     reservation.status = enums.ReservationStatus.CHECKED_IN # make reservation's status "checked_in" for allowed check out
+    test_db.commit()
 
     response = client.post(f"/reservations/{reservation.reservation_id}/check-out")
 
