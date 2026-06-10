@@ -64,7 +64,7 @@ def reservation_update(db: Session, reservation_id: int, data: ReservationUpdate
 
     if data.check_in_date is not None or data.check_out_date is not None:
         # if stay has started, cannot modify dates
-        if reservation.check_in_date <= date.today():
+        if reservation.check_in_date <= date.today() and reservation.status != enums.ReservationStatus.BOOKED:
             raise InvalidReservationStateError("Cannot modify dates after stay has started.")
 
         # if dates valid -> check if the room is already booked on those dates
