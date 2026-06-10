@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 
 from database import Base, get_db
 from api import app
-from models import Guest
 
 load_dotenv()
 
@@ -21,20 +20,25 @@ TEST_DATABASE_URL = (f'postgresql+psycopg2://'
                 'hotel_system_test') # changed to the test database
 
 engine_test = create_engine(TEST_DATABASE_URL)
-
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_database():
+    Base.metadata.create_all(bind=engine_test)
+    yield
+    Base.metadata.drop_all(bind=engine_test)
 
 @pytest.fixture()
 def test_db():
-    Base.metadata.create_all(bind=engine_test) #//// do sessions and transactions.
+    connection = engine_test.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
 
-    test_db = TestingSessionLocal()
-    try:
-        yield test_db
-    finally:
-        test_db.close()
+    yield session
 
-    Base.metadata.drop_all(bind=engine_test) #//// do sessions and transactions.
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 @pytest.fixture()
 def client(test_db):
@@ -42,9 +46,7 @@ def client(test_db):
         yield test_db
 
     app.dependency_overrides[get_db] = override_get_db
-
     yield TestClient(app)
-
     app.dependency_overrides.clear()
 
 @pytest.fixture()
