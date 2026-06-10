@@ -149,7 +149,6 @@ class RevenueReportRequest(BaseModel):
     start_date: date
     end_date: date
 
-    # temporary
     @model_validator(mode="after")
     def validate_search_dates(self):
         if self.end_date <= self.start_date:
@@ -175,6 +174,12 @@ class OccupancyReportResponse(BaseModel):
 class OccupancyReportRequest(BaseModel):
     month_start: date
     month_end: date
+
+    @model_validator(mode="after")
+    def validate_search_dates(self):
+        if self.month_end <= self.month_start:
+            raise ConflictingDateError("End date must be after start date.")
+        return self
 
 class MonthlyOccupancyReportResponse(BaseModel):
     available_room_nights: int
