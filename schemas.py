@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator, model_validator, Fiel
 from datetime import date
 from decimal import Decimal
 
-from exceptions import InvalidPhoneNumberError, ConflictingDateError
+from exceptions import InvalidPhoneNumberError, ConflictingDateError, InvalidRoomNumberError
 
 # --- shared validator ---
 def validate_phone_number(phone: str | None) -> str | None:
@@ -22,6 +22,15 @@ def validate_dates(check_in_date: date, check_out_date: date) -> None:
 
     if check_in_date < date.today():
         raise ConflictingDateError("Check-in cannot be in the past.")
+
+def validate_room_number(room_number: int) -> int | None:
+    if room_number is None:
+        return room_number
+
+    if room_number <= 0:
+        raise InvalidRoomNumberError("Room number must be positive.")
+
+    return room_number
 
 # --- input: creating a guest ---
 class GuestCreate(BaseModel):
@@ -64,6 +73,11 @@ class RoomCreate(BaseModel):
     room_type: str
     room_number: int
 
+    @field_validator("room_number")
+    @classmethod
+    def validate_room_num(cls, room_number):
+        return validate_room_number(room_number)
+
 class RoomResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -81,6 +95,10 @@ class RoomUpdate(BaseModel):
     price_per_night: float | None = Field(default = None, ge=99.99, le=1299.99)
     is_active: bool | None = None
 
+    @field_validator("room_number")
+    @classmethod
+    def validate_room_num(cls, room_number):
+        return validate_room_number(room_number)
 
 # --- reservations ---
 class ReservationCreate(BaseModel):

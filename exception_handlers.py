@@ -67,3 +67,7 @@ def register_exception_handlers(app):
     @app.exception_handler(exceptions.ConflictingRoomNumberError)
     def conflicting_room_numbers(_, exc: exceptions.ConflictingRoomNumberError):
         return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+    @app.exception_handler(exceptions.InvalidRoomNumberError)
+    def invalid_room_number(_, exc: exceptions.InvalidRoomNumberError):
+        return JSONResponse(status_code=422, content={"detail": str(exc)})

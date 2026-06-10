@@ -44,3 +44,6 @@ class InvalidPhoneNumberError(Exception):
 
 class ConflictingRoomNumberError(Exception):
     pass
+
+class InvalidRoomNumberError(Exception):
+    pass
