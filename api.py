@@ -29,7 +29,7 @@ def guest_create(request: schemas.GuestCreate, db: db_session) -> models.Guest:
         request.phone
     )
 
-@app.get("/guests", response_model=list[schemas.GuestResponse], dependencies=[Depends(auth.get_current_user)])
+@app.get("/guests", response_model=list[schemas.GuestResponse])
 def guests_get(db: db_session) -> list[models.Guest]:
     return guest_services.guests_get_all(db)
 
