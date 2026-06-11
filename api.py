@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import Annotated
 
 from database import get_db
-from services import guest_services, room_services, reservation_services, report_services
+from services import guest_services, room_services, reservation_services, report_services, auth_services
 from exception_handlers import register_exception_handlers
 
-import schemas, models
+import schemas, models, auth
 
 app = FastAPI()
 register_exception_handlers(app)
@@ -28,7 +29,7 @@ def guest_create(request: schemas.GuestCreate, db: db_session) -> models.Guest:
         request.phone
     )
 
-@app.get("/guests", response_model=list[schemas.GuestResponse])
+@app.get("/guests", response_model=list[schemas.GuestResponse], dependencies=[Depends(auth.get_current_user)])
 def guests_get(db: db_session) -> list[models.Guest]:
     return guest_services.guests_get_all(db)
 
@@ -136,3 +137,16 @@ def occupancy_report(db: db_session) -> schemas.OccupancyReportResponse:
 @app.post("/reports/occupancy/monthly", response_model=schemas.MonthlyOccupancyReportResponse)
 def occupancy_report_monthly(request: schemas.OccupancyReportRequest, db: db_session) -> schemas.MonthlyOccupancyReportResponse:
     return report_services.occupancy_report_monthly(db, request)
+
+# --- JWT AUTHENTICATION ---
+@app.post("/auth/register", status_code=201)
+def register(request: schemas.UserRegister, db: db_session):
+    return auth_services.register(db, request.email, request.password)
+
+@app.post("/auth/login", response_model=schemas.TokenResponse)
+def login(request: schemas.UserLogin, db: db_session) -> schemas.TokenResponse:
+    return auth_services.login(db, request.email, request.password)
+
+@app.post("/auth/token", response_model=schemas.TokenResponse)
+def token(db: db_session, form_data: OAuth2PasswordRequestForm = Depends()) -> schemas.TokenResponse:
+    return auth_services.login(db, form_data.username, form_data.password)

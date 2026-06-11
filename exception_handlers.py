@@ -71,3 +71,7 @@ def register_exception_handlers(app):
     @app.exception_handler(exceptions.InvalidRoomNumberError)
     def invalid_room_number(_, exc: exceptions.InvalidRoomNumberError):
         return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    @app.exception_handler(exceptions.InvalidCredentialsError)
+    def invalid_credentials(_, exc: exceptions.InvalidCredentialsError):
+        return JSONResponse(status_code=401, content={"detail": str(exc)})

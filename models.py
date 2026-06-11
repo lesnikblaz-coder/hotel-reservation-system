@@ -116,3 +116,11 @@ class Reservation(Base):
             raise CheckOutDatePassedError("Cannot check out before check-in date.")
 
         self.status = enums.ReservationStatus.CHECKED_OUT
+
+class User(Base):
+    __tablename__ = "users"
+
+    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)

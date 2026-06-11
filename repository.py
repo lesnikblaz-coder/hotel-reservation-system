@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 from decimal import Decimal
 
-from models import Guest, Room, Reservation
+from models import Guest, Room, Reservation, User
 from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch, RevenueReportRequest
 
 import enums
@@ -168,3 +168,11 @@ def reservations_for_month(db: Session, month_start: date, month_end: date) -> l
         Reservation.check_in_date < month_end,
         Reservation.check_out_date > month_start
     )).all())
+
+# USERS
+def get_user_by_email(db: Session, email: str) -> User | None:
+    return db.scalar(select(User).where(User.email == email))
+
+def user_create(db: Session, user: User) -> User:
+    db.add(user)
+    return save(db, user)

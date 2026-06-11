@@ -47,3 +47,6 @@ class ConflictingRoomNumberError(Exception):
 
 class InvalidRoomNumberError(Exception):
     pass
+
+class InvalidCredentialsError(Exception):
+    pass

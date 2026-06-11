@@ -32,7 +32,21 @@ def validate_room_number(room_number: int) -> int | None:
 
     return room_number
 
-# --- input: creating a guest ---
+# --- authentication schemas ---
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8)
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+# --- guests ---
 class GuestCreate(BaseModel):
     first_name: str = Field(min_length=2, max_length=18)
     last_name: str = Field(min_length=2, max_length=23)
@@ -45,7 +59,6 @@ class GuestCreate(BaseModel):
     def validate_phone(cls, phone):
         return validate_phone_number(phone)
 
-# --- output: returning a guest ---
 class GuestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -55,7 +68,6 @@ class GuestResponse(BaseModel):
     email: str
     phone: str
 
-# --- input: updating a guest (all optional) ---
 class GuestUpdate(BaseModel):
     first_name: str | None = Field(default = None, min_length = 2, max_length = 18)
     last_name: str | None = Field(default = None, min_length = 2, max_length = 18)
@@ -67,6 +79,7 @@ class GuestUpdate(BaseModel):
     @classmethod
     def validate_phone(cls, phone):
         return validate_phone_number(phone)
+
 
 # --- rooms ---
 class RoomCreate(BaseModel):
@@ -99,6 +112,7 @@ class RoomUpdate(BaseModel):
     @classmethod
     def validate_room_num(cls, room_number):
         return validate_room_number(room_number)
+
 
 # --- reservations ---
 class ReservationCreate(BaseModel):
