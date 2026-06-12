@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from models import Guest, Room, Reservation, User
-from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch, RevenueReportRequest
+from schemas import GuestUpdate, RoomUpdate, ReservationUpdate, RoomAvailabilitySearch, RevenueReportRequest, UserUpdate
 
 import enums
 
@@ -173,6 +173,25 @@ def reservations_for_month(db: Session, month_start: date, month_end: date) -> l
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email))
 
+def get_user_by_id(db: Session, user_id: int) -> User | None:
+    return db.scalar(select(User).where(User.user_id == user_id))
+
 def user_create(db: Session, user: User) -> User:
     db.add(user)
     return save(db, user)
+
+def user_update(db: Session, user: User, data: UserUpdate) -> User:
+    update_data = data.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    return save(db, user)
+
+def get_all_users(db: Session) -> list[User]:
+    return list(db.scalars(select(User).order_by(User.user_id)).all())
+
+def user_delete(db: Session, user: User) -> User:
+    db.delete(user)
+    db.commit()
+    return user

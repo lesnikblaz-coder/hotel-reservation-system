@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator, model_validator, Fiel
 from datetime import date
 from decimal import Decimal
 
-from exceptions import InvalidPhoneNumberError, ConflictingDateError, InvalidRoomNumberError
+from enums import UserRole
 
 # --- shared validator ---
 def validate_phone_number(phone: str | None) -> str | None:
@@ -12,23 +12,23 @@ def validate_phone_number(phone: str | None) -> str | None:
     phone = phone.replace(" ", "")
 
     if not ((phone.startswith("+") and phone[1:].isdigit()) or phone.isdigit()):
-        raise InvalidPhoneNumberError("Invalid phone number.")
+        raise ValueError("Invalid phone number.")
 
     return phone
 
 def validate_dates(check_in_date: date, check_out_date: date) -> None:
     if check_out_date <= check_in_date:
-        raise ConflictingDateError("Check-out must be after check in.")
+        raise ValueError("Check-out must be after check in.")
 
     if check_in_date < date.today():
-        raise ConflictingDateError("Check-in cannot be in the past.")
+        raise ValueError("Check-in cannot be in the past.")
 
 def validate_room_number(room_number: int) -> int | None:
     if room_number is None:
         return room_number
 
     if room_number <= 0:
-        raise InvalidRoomNumberError("Room number must be positive.")
+        raise ValueError("Room number must be positive.")
 
     return room_number
 
@@ -40,6 +40,18 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class UserUpdate(BaseModel):
+    is_active: bool | None = None
+    role: UserRole | None = None
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    email: EmailStr
+    is_active: bool
+    role: UserRole
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -166,7 +178,7 @@ class RevenueReportRequest(BaseModel):
     @model_validator(mode="after")
     def validate_search_dates(self):
         if self.end_date <= self.start_date:
-            raise ConflictingDateError("End date must be after start date.")
+            raise ValueError("End date must be after start date.")
         return self
 
 class RevenueReportResponse(BaseModel):
@@ -192,7 +204,7 @@ class OccupancyReportRequest(BaseModel):
     @model_validator(mode="after")
     def validate_search_dates(self):
         if self.month_end <= self.month_start:
-            raise ConflictingDateError("End date must be after start date.")
+            raise ValueError("End date must be after start date.")
         return self
 
 class MonthlyOccupancyReportResponse(BaseModel):

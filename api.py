@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from database import get_db
-from services import guest_services, room_services, reservation_services, report_services, auth_services
+from services import guest_services, room_services, reservation_services, report_services, auth_services, user_services
 from exception_handlers import register_exception_handlers
 
 import schemas, models, auth
@@ -140,8 +140,21 @@ def occupancy_report_monthly(request: schemas.OccupancyReportRequest, db: db_ses
     return report_services.occupancy_report_monthly(db, request)
 
 # USERS
-#
+@app.get("/users", response_model=list[schemas.UserResponse]) # admin +
+def users_get(db: db_session, _: models.User = Depends(auth.require_admin)) -> list[models.User]:
+    return user_services.users_get_all(db)
 
+@app.get("/users/{user_id}", response_model=schemas.UserResponse) # admin +
+def user_get(user_id: int, db: db_session, _: models.User = Depends(auth.require_admin)) -> models.User:
+    return user_services.user_get_by_id(db, user_id)
+
+@app.put("/users/{user_id}", response_model=schemas.UserResponse) # admin +
+def user_update(user_id: int, request: schemas.UserUpdate, db: db_session, _: models.User = Depends(auth.require_admin)) -> models.User:
+    return user_services.user_update(db, user_id, request)
+
+@app.delete("/users/{user_id}", status_code=204) # admin +
+def user_delete(user_id: int, db: db_session, _: models.User = Depends(auth.require_admin)) -> None:
+    user_services.user_delete(db, user_id)
 
 # --- JWT AUTHENTICATION ---
 @app.post("/auth/register", status_code=201)
