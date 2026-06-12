@@ -41,9 +41,6 @@ def reservation_create(db: Session, guest_id: int, room_id: int, check_in_date: 
     # check if the room is already booked on those dates.
     validate_room_availability(db, room_id, check_in_date, check_out_date)
 
-    # date validation
-    validate_reservation_dates(check_in_date, check_out_date)
-
     # create a reservation with default status "booked"
     reservation = Reservation(guest_id=guest_id, room_id=room_id, check_in_date=check_in_date, check_out_date=check_out_date, status=enums.ReservationStatus.BOOKED.value)
 
