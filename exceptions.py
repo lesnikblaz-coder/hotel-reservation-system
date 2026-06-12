@@ -50,3 +50,12 @@ class InvalidRoomNumberError(Exception):
 
 class InvalidCredentialsError(Exception):
     pass
+
+class InvalidTokenError(Exception):
+    pass
+
+class UserNotFoundError(Exception):
+    pass
+
+class InsufficientPermissions(Exception):
+    pass

@@ -124,3 +124,4 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    role: Mapped[str] = mapped_column(String, nullable=False, default=enums.UserRole.GUEST.value)

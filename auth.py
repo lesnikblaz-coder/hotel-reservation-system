@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 from database import get_db
 from models import User
+
+import enums
+import exceptions
 
 load_dotenv()
 get_secret_key = os.getenv("SECRET_KEY")
@@ -40,11 +43,27 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = int(payload["sub"])
     except (JWTError, KeyError):
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise exceptions.InvalidTokenError("Invalid token")
 
     user = db.scalar(select(User).where(User.user_id == user_id))
 
     if user is None:
-        raise HTTPException(status_code=401, detail="User not found.")
+        raise exceptions.UserNotFoundError("User not found.")
 
     return user
+
+def required_roles(*roles):
+    def checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in roles:
+            raise exceptions.InsufficientPermissions("Insufficient permissions.")
+        return current_user
+    return checker
+
+require_staff = required_roles(
+    enums.UserRole.STAFF,
+    enums.UserRole.ADMIN
+)
+
+require_admin = required_roles(
+    enums.UserRole.ADMIN
+)

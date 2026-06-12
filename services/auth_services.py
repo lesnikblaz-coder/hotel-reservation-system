@@ -9,7 +9,7 @@ def register(db: Session, email: str, password: str) -> User:
     if repository.get_user_by_email(db, email):
         raise DuplicateEmailError("Email already registered.")
 
-    user = User(email=email, hashed_password=auth.hash_password(password))
+    user = User(email=email, hashed_password=auth.hash_password(password)) # role: guest asserted as default
 
     return repository.user_create(db, user)
 
