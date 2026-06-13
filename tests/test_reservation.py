@@ -57,8 +57,8 @@ def test_invalid_check_out(client, create_guest, create_room):
         "check_out_date": (date.today() + timedelta(days=-7)).isoformat()
     })
 
-    assert response.status_code == 409
-    assert response.json()["detail"] == "Check-out must be after check in."
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Value error, Check-out must be after check in."
 
 def test_conflicting_dates(client, create_reservation, create_room, create_guest):
     response = client.post("/reservations", json={

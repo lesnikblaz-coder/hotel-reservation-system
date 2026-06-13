@@ -17,8 +17,8 @@ def test_revenue_invalid_end_date(client, create_reservation):
         "end_date": (date.today() + timedelta(days=-7)).isoformat()
     })
 
-    assert response.status_code == 409
-    assert response.json()["detail"] == "End date must be after start date."
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Value error, End date must be after start date."
 
 def test_revenue_empty_payload(client, create_reservation):
     response = client.post("/reports/revenue", json={
@@ -59,8 +59,8 @@ def test_occupancy_invalid_end_date(client, create_reservation):
         "month_end": (date.today() + timedelta(days=-7)).isoformat()
     })
 
-    assert response.status_code == 409
-    assert response.json()["detail"] == "End date must be after start date."
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Value error, End date must be after start date."
 
 def test_occupancy_empty_payload(client, create_reservation):
     response = client.post("/reports/occupancy/monthly", json={

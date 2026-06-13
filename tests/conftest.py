@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 
 from database import Base, get_db
 from api import app
+from models import User
+from auth import get_current_user
 
 load_dotenv()
 
@@ -45,8 +47,14 @@ def client(test_db):
     def override_get_db():
         yield test_db
 
+    def override_auth():
+        return User(user_id=1, email="testuser@user.com", role="admin", is_active=True)
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_auth
+
     yield TestClient(app)
+
     app.dependency_overrides.clear()
 
 @pytest.fixture()

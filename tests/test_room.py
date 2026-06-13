@@ -30,8 +30,8 @@ def test_invalid_room(client):
         "room_type": "invalid",
         "room_number": 201
     })
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid room type. Valid types: single, double, suite"
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Input should be 'single', 'double' or 'suite'"
 
 def test_missing_field_room(client):
     response = client.post("/rooms", json={
@@ -45,7 +45,7 @@ def test_invalid_room_number(client):
         "room_number": -100
     })
     assert response.status_code == 422
-    assert response.json()["detail"] == "Room number must be positive."
+    assert response.json()["detail"][0]["msg"] == "Value error, Room number must be positive."
 
 def test_duplicate_room_numbers(client, create_room):
     room1 = create_room
