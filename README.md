@@ -163,11 +163,34 @@ Authorization: Bearer <access_token>
 
 Protected endpoints enforce role-based access control using FastAPI dependency injection.
 
-Examples:
+### Role Permissions Matrix
 
-* Authenticated users can create reservations and search availability.
-* Staff members can manage operational hotel activities.
-* Administrators have full system access.
+| Action                    | Guest | Staff | Admin |
+| ------------------------- | :---: | :---: | :---: |
+| Register account          |   ✅   |   ✅   |   ✅   |
+| Login                     |   ✅   |   ✅   |   ✅   |
+| Create guest record       |   ✅   |   ✅   |   ✅   |
+| View guests               |   ❌   |   ✅   |   ✅   |
+| View guest details        |   ❌   |   ✅   |   ✅   |
+| Update guests             |   ❌   |   ❌   |   ✅   |
+| Delete guests             |   ❌   |   ❌   |   ✅   |
+| Search room availability  |   ✅   |   ✅   |   ✅   |
+| Create reservation        |   ✅   |   ✅   |   ✅   |
+| View reservations         |   ❌   |   ✅   |   ✅   |
+| View reservation details  |   ❌   |   ✅   |   ✅   |
+| Cancel reservation        |   ❌   |   ✅   |   ✅   |
+| Check in guests           |   ❌   |   ✅   |   ✅   |
+| Check out guests          |   ❌   |   ✅   |   ✅   |
+| View rooms                |   ❌   |   ✅   |   ✅   |
+| Create rooms              |   ❌   |   ❌   |   ✅   |
+| Update rooms              |   ❌   |   ❌   |   ✅   |
+| Delete rooms              |   ❌   |   ❌   |   ✅   |
+| Activate/deactivate rooms |   ❌   |   ❌   |   ✅   |
+| View occupancy reports    |   ❌   |   ✅   |   ✅   |
+| View revenue reports      |   ❌   |   ❌   |   ✅   |
+| View users                |   ❌   |   ❌   |   ✅   |
+| Update users              |   ❌   |   ❌   |   ✅   |
+| Delete users              |   ❌   |   ❌   |   ✅   |
 
 ## Tech Stack
 
