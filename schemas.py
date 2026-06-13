@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator, model_validator, Fiel
 from datetime import date
 from decimal import Decimal
 
-from enums import UserRole
+from enums import UserRole, RoomType, ReservationStatus
 
 # --- shared validator ---
 def validate_phone_number(phone: str | None) -> str | None:
@@ -95,7 +95,7 @@ class GuestUpdate(BaseModel):
 
 # --- rooms ---
 class RoomCreate(BaseModel):
-    room_type: str
+    room_type: RoomType
     room_number: int
 
     @field_validator("room_number")
@@ -108,13 +108,13 @@ class RoomResponse(BaseModel):
 
     room_id: int
     room_number: int
-    room_type: str
+    room_type: RoomType
     capacity: int
     price_per_night: float
     is_active: bool
 
 class RoomUpdate(BaseModel):
-    room_type: str | None = None
+    room_type: RoomType | None = None
     room_number: int | None = None
     capacity: int | None = Field(default = None, ge=2, le=12)
     price_per_night: float | None = Field(default = None, ge=99.99, le=1299.99)
@@ -147,7 +147,7 @@ class ReservationResponse(BaseModel):
     room_id: int
     check_in_date: date
     check_out_date: date
-    status: str
+    status: ReservationStatus
     total_price: Decimal
 
 class ReservationUpdate(BaseModel):
@@ -155,7 +155,7 @@ class ReservationUpdate(BaseModel):
     room_id: int | None = None
     check_in_date: date | None = None
     check_out_date: date | None = None
-    status: str | None = None
+    status: ReservationStatus | None = None
     # validate dates in reservation_services because only 1 might get updated.
 
 

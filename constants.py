@@ -14,15 +14,15 @@ CHECKOUT_STATUSES = {enums.ReservationStatus.CHECKED_IN.value}
 NON_DELETABLE_STATUSES = {enums.ReservationStatus.BOOKED.value, enums.ReservationStatus.CHECKED_IN.value}
 
 VALID_ROOM_TYPES = {
-    "single": {
+    enums.RoomType.SINGLE: {
         "capacity": 3,
         "price_per_night": Decimal("99.99")
     },
-    "double": {
+    enums.RoomType.DOUBLE: {
         "capacity": 5,
         "price_per_night": Decimal("179.99")
     },
-    "suite": {
+    enums.RoomType.SUITE: {
         "capacity": 8,
         "price_per_night": Decimal("349.99")
     }

@@ -10,3 +10,8 @@ class UserRole(StrEnum):
     GUEST = "guest"
     STAFF = "staff"
     ADMIN = "admin"
+
+class RoomType(StrEnum):
+    SINGLE = "single"
+    DOUBLE = "double"
+    SUITE = "suite"
