@@ -76,7 +76,7 @@ The API uses three authorization levels:
 
 | Role  | Permissions                                                                                                           |
 | ----- | --------------------------------------------------------------------------------------------------------------------- |
-| Guest | Register, login, create reservations, search room availability, manage guest records                                  |
+| Guest | Register, login, create reservations, search room availability                                                        |
 | Staff | All Guest permissions plus view guests, rooms, reservations, occupancy reports, perform check-in/check-out operations |
 | Admin | Full system access including room management, reservation updates, revenue reports, and user management               |
 
@@ -103,7 +103,7 @@ The API uses three authorization levels:
 
 | Method | Endpoint             | Access             |
 | ------ | -------------------- | ------------------ |
-| POST   | `/guests`            | Authenticated User |
+| POST   | `/guests`            | Staff+             |
 | GET    | `/guests`            | Staff+             |
 | GET    | `/guests/{guest_id}` | Staff+             |
 | PUT    | `/guests/{guest_id}` | Admin              |
@@ -169,7 +169,7 @@ Protected endpoints enforce role-based access control using FastAPI dependency i
 | ------------------------- | :---: | :---: | :---: |
 | Register account          |   ✅   |   ✅   |   ✅   |
 | Login                     |   ✅   |   ✅   |   ✅   |
-| Create guest record       |   ✅   |   ✅   |   ✅   |
+| Create guest record       |   ❌   |   ✅   |   ✅   |
 | View guests               |   ❌   |   ✅   |   ✅   |
 | View guest details        |   ❌   |   ✅   |   ✅   |
 | Update guests             |   ❌   |   ❌   |   ✅   |

@@ -20,7 +20,7 @@ db_session = Annotated[Session, Depends(get_db)]
 
 # --- guests ---
 @app.post("/guests", status_code=201 , response_model=schemas.GuestResponse) # guest +
-def guest_create(request: schemas.GuestCreate, db: db_session, _: models.User = Depends(auth.get_current_user)) -> models.Guest:
+def guest_create(request: schemas.GuestCreate, db: db_session, _: models.User = Depends(auth.require_staff)) -> models.Guest:
     return guest_services.guest_create(
         db,
         request.first_name,
