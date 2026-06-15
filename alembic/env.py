@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from database import Base
-from models import Guest, Room, Reservation
+from models import Guest, Room, Reservation, User
 from database import DATABASE_URL
 
 # this is the Alembic Config object, which provides

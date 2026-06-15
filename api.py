@@ -7,7 +7,9 @@ from database import get_db
 from services import guest_services, room_services, reservation_services, report_services, auth_services, user_services
 from exception_handlers import register_exception_handlers
 
-import schemas, models, auth
+import schemas
+import models
+import auth
 
 app = FastAPI()
 register_exception_handlers(app)
