@@ -1,6 +1,6 @@
 # Hotel Reservation System
 
-A hotel reservation management API built with FastAPI, PostgreSQL, and SQLAlchemy ORM, following a layered architecture with separate API, service, and data access layers.
+A hotel reservation management API built with FastAPI, PostgreSQL, SQLAlchemy ORM, Alembic, and Docker, following a layered architecture with separate API, service, and data access layers.
 
 This project started as a command-line application using SQLite and was later refactored into a secure REST API using FastAPI, PostgreSQL, JWT authentication, and role-based access control as part of my backend development learning journey.
 
@@ -204,6 +204,8 @@ Protected endpoints enforce role-based access control using FastAPI dependency i
 * OAuth2 Password Flow
 * Password Hashing
 * Pytest
+* Docker
+* Docker Compose
 
 ## Project Evolution
 
@@ -221,6 +223,7 @@ This project went through several iterations:
 10. Implemented role-based access control (Guest, Staff, Admin).
 11. Added user management functionality.
 12. Added comprehensive automated API testing with Pytest.
+13. Containerized the application and database using Docker and Docker Compose.
 
 ## Architecture
 
@@ -324,22 +327,58 @@ View migration history:
 alembic history
 ```
 
-## Running the Application
+# Option 1: Running with Docker
+
+Build and start the application and PostgreSQL database:
 
 ```bash
-uvicorn api:app --reload
+docker compose up --build
 ```
 
-## API Documentation:
+## API available at:
 
 ```text
-http://127.0.0.1:8000/docs
+http://localhost:8000
+```
+
+## API Swagger Documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+## Stop Docker containers
+```bash
+docker compose down
+```
+
+## Stop Docker containers and remove database volume
+```bash
+docker compose down -v
 ```
 
 ## Running Tests
 
 ```bash
 python -m pytest -v
+```
+
+## Option 2: Local development
+
+```bash
+uvicorn api:app --reload
+```
+
+## API available at:
+
+```text
+http://localhost:8000
+```
+
+## API Swagger Documentation:
+
+```text
+http://localhost:8000/docs
 ```
 
 ## Key Learning Outcomes
@@ -354,12 +393,13 @@ python -m pytest -v
 * Layered application architecture
 * Input validation with Pydantic
 * Automated testing with Pytest
+* Application containerization with Docker
+* Multi-container development environments with Docker Compose
 
 ## Future Improvements
 
 * Refresh tokens
 * Password reset flow
-* Docker + Docker Compose
 * GitHub Actions (CI/CD)
 * Deploy to Render
 * API rate limiting
