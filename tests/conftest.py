@@ -1,6 +1,7 @@
 import pytest
 import os
 
+from pathlib import Path
 from datetime import date, timedelta
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
@@ -12,14 +13,17 @@ from api import app
 from models import User
 from auth import get_current_user
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env.test")
 
 TEST_DATABASE_URL = (f'postgresql+psycopg2://'
-                f'{os.getenv("DB_USER")}:'
-                f'{os.getenv("DB_PASSWORD")}@'
-                f'{os.getenv("DB_HOST")}:'
-                f'{os.getenv("DB_PORT")}/'
+                f'{os.getenv("TEST_DB_USER")}:'
+                f'{os.getenv("TEST_DB_PASSWORD")}@'
+                f'{os.getenv("TEST_DB_HOST")}:'
+                f'{os.getenv("TEST_DB_PORT")}/'
                 'hotel_system_test') # changed to the test database
+
+print("debug", TEST_DATABASE_URL)
+print("debug port ", os.getenv("TEST_DB_PORT"))
 
 engine_test = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
